@@ -7,7 +7,7 @@
  */
 
 import { registerPlugin } from '@wordpress/plugins';
-import { dispatch, select } from '@wordpress/data';
+import { dispatch, select, useSelect } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as coreStore } from '@wordpress/core-data';
 import { useState, useEffect, useCallback, createPortal } from '@wordpress/element';
@@ -125,11 +125,24 @@ function GameModeUI() {
 		}
 	}, [ level ] );
 
+	// Avoid layering the first-run picker on top of WP's welcome guide. Wait
+	// until the welcome guide preference flips off (user dismissed it) before
+	// auto-opening.
+	const welcomeGuideOpen = useSelect( ( s ) => {
+		const prefs = s( preferencesStore );
+		return (
+			!! prefs.get( 'core/edit-site', 'welcomeGuide' ) ||
+			!! prefs.get( 'core/edit-site', 'welcomeGuideStyles' ) ||
+			!! prefs.get( 'core/edit-post', 'welcomeGuide' ) ||
+			!! prefs.get( 'core/editor', 'welcomeGuide' )
+		);
+	}, [] );
+
 	useEffect( () => {
-		if ( isFirstRun ) {
+		if ( isFirstRun && ! welcomeGuideOpen ) {
 			setPickerOpen( true );
 		}
-	}, [ isFirstRun ] );
+	}, [ isFirstRun, welcomeGuideOpen ] );
 
 	const performSwitch = useCallback(
 		async ( next, wasFirstRun ) => {
