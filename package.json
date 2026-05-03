@@ -1,0 +1,32 @@
+{
+  "name": "game-mode",
+  "version": "0.1.0",
+  "description": "Difficulty levels for the WordPress Site Editor.",
+  "private": true,
+  "license": "GPL-2.0-or-later",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint:js": "wp-scripts lint-js",
+    "test": "wp-scripts test-unit-js",
+    "format": "wp-scripts format"
+  },
+  "devDependencies": {
+    "@wordpress/api-fetch": "^7.45.0",
+    "@wordpress/block-editor": "^15.18.0",
+    "@wordpress/components": "^33.0.0",
+    "@wordpress/compose": "^7.45.0",
+    "@wordpress/core-data": "^7.45.0",
+    "@wordpress/data": "^10.45.0",
+    "@wordpress/element": "^6.45.0",
+    "@wordpress/env": "^10.39.0",
+    "@wordpress/hooks": "^4.45.0",
+    "@wordpress/i18n": "^6.18.0",
+    "@wordpress/icons": "^13.0.0",
+    "@wordpress/notices": "^5.45.0",
+    "@wordpress/plugins": "^7.45.0",
+    "@wordpress/preferences": "^4.45.0",
+    "@wordpress/scripts": "^30.0.0"
+  }
+}

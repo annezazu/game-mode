@@ -1,0 +1,14 @@
+{
+	"core": "https://wordpress.org/wordpress-7.0-RC2.zip",
+	"phpVersion": "8.2",
+	"plugins": [ "." ],
+	"port": 8898,
+	"testsPort": 8899,
+	"config": {
+		"WP_DEBUG": true,
+		"SCRIPT_DEBUG": true
+	},
+	"mappings": {
+		"wp-content/themes/twentytwentyfive": "https://downloads.wordpress.org/theme/twentytwentyfive.zip"
+	}
+}

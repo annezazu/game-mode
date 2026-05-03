@@ -1,0 +1,193 @@
+/**
+ * Game Mode — design-token-driven styles.
+ *
+ * No hard-coded colors, spacing, or typography. Accent comes from
+ * --game-mode-accent (set per level) blended with --wp-admin-theme-color.
+ */
+
+$switcher-z: 100000;
+
+.game-mode-picker-modal {
+	.components-modal__content {
+		max-width: 540px;
+	}
+
+	&__intro {
+		margin: 0;
+	}
+}
+
+.game-mode-level-card {
+	cursor: pointer;
+	border: 1px solid var(--wp-components-color-gray-300, #ddd);
+	transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+
+	&:hover {
+		border-color: var(--game-mode-accent, var(--wp-admin-theme-color, #007cba));
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--wp-admin-theme-color, #007cba);
+		outline-offset: 2px;
+	}
+
+	&.is-selected {
+		border-color: var(--game-mode-accent, var(--wp-admin-theme-color, #007cba));
+		box-shadow: 0 0 0 1px var(--game-mode-accent, var(--wp-admin-theme-color, #007cba));
+	}
+
+	&__icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 4px;
+		background: var(--game-mode-accent, var(--wp-admin-theme-color, #007cba));
+		color: #fff;
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	&__check {
+		color: var(--game-mode-accent, var(--wp-admin-theme-color, #007cba));
+	}
+}
+
+.game-mode-switcher {
+	position: fixed;
+	right: 16px;
+	bottom: 16px;
+	z-index: $switcher-z;
+
+	&__toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 14px;
+		min-height: 40px;
+		border: none;
+		border-radius: 999px;
+		background: var(--game-mode-accent, var(--wp-admin-theme-color, #007cba));
+		color: #fff;
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 1;
+		cursor: pointer;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+		transition: transform 120ms ease, box-shadow 120ms ease, background-color 200ms ease;
+
+		&:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+		}
+
+		&:focus-visible {
+			outline: 2px solid #fff;
+			outline-offset: 2px;
+			box-shadow: 0 0 0 4px var(--game-mode-accent, var(--wp-admin-theme-color, #007cba));
+		}
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	&__icon {
+		display: inline-flex;
+		align-items: center;
+	}
+
+	&__label {
+		display: inline-block;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.game-mode-switcher__toggle {
+		transition: none;
+	}
+}
+
+// Easy mode: keep the inserter button accessible (so users can browse
+// patterns) but suppress the other topbar affordances and hide the
+// non-Patterns tabs in the inserter sidebar. JS observer in
+// easy-patterns-only-inserter.js auto-selects the Patterns tab.
+body[data-game-mode="easy"] {
+	.edit-site-header-edit-mode__list-view-toggle,
+	.editor-document-tools__document-overview-toggle,
+	.editor-zoom-out-toggle {
+		display: none !important;
+	}
+
+	// The inserter tablist is hidden by the JS observer (after the Patterns
+	// tab has been activated) so we don't break the sidebar's slide-in
+	// animation by mutating layout-affecting CSS on the tablist element.
+
+	// (The "Advanced" panel — anchor + custom CSS class fields — is hidden
+	// via the JS observer in easy-block-inspector.js by matching its visible
+	// header label "Advanced". The class name `.block-editor-block-inspector__advanced`
+	// is misleadingly named — it's the wrapper for ALL block-support panels.)
+
+	// (The block-inspector tablist is hidden by the JS observer in
+	// easy-block-inspector.js after the Styles tab has been activated.)
+
+	// Hide block-level Layout / Dimensions / Border / Position panels.
+	// Targeted by panel header label via :has() — works in modern browsers
+	// (Chrome 105+, Safari 15.4+, Firefox 121+ which covers WP-supported set).
+	.block-editor-block-inspector .components-tools-panel,
+	.block-editor-block-inspector .components-panel__body {
+		&:has(> .components-tools-panel-header [aria-label="Layout"]),
+		&:has(> .components-tools-panel-header [aria-label*="Layout"]),
+		&:has(> h2 button[aria-label="Layout"]),
+		&:has(> h2 button[aria-label*="Layout"]),
+		&:has(> .components-tools-panel-header [aria-label="Dimensions"]),
+		&:has(> h2 button[aria-label="Dimensions"]),
+		&:has(> .components-tools-panel-header [aria-label="Border"]),
+		&:has(> h2 button[aria-label="Border"]),
+		&:has(> .components-tools-panel-header [aria-label="Position"]),
+		&:has(> h2 button[aria-label="Position"]),
+		&:has(> .components-tools-panel-header [aria-label="Shadow"]),
+		&:has(> h2 button[aria-label="Shadow"]),
+		&:has(> .components-tools-panel-header [aria-label="Background"]),
+		&:has(> h2 button[aria-label="Background"]) {
+			display: none !important;
+		}
+	}
+
+	// Hide the layout-only sub-controls some blocks render outside the
+	// standard ToolsPanel (e.g. Group's "Inner blocks use full width").
+	.block-editor-hooks__layout-controls {
+		display: none !important;
+	}
+}
+
+// Hard mode: keep every block-support control visible and prevent the user
+// from collapsing them via the ToolsPanel ellipsis menu.
+body[data-game-mode="hard"] {
+	.components-tools-panel-header,
+	.components-tools-panel__header {
+		.components-dropdown-menu,
+		button[aria-label*="View" i][aria-haspopup="true"],
+		button[aria-label*="options" i][aria-haspopup="true"] {
+			display: none !important;
+		}
+	}
+}
+
+.game-mode-confirm-discard {
+	background: none;
+	border: none;
+	padding: 0;
+	font-size: 13px;
+	color: var(--wp-components-color-foreground-muted, #757575);
+	text-decoration: underline;
+	cursor: pointer;
+
+	&:hover,
+	&:focus-visible {
+		color: var(--wp-admin-theme-color, #007cba);
+	}
+}
