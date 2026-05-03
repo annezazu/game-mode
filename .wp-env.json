@@ -1,7 +1,7 @@
 {
 	"core": "https://wordpress.org/wordpress-7.0-RC2.zip",
 	"phpVersion": "8.2",
-	"plugins": [ "." ],
+	"plugins": [ "/tmp/game-mode-link/game-mode" ],
 	"port": 8898,
 	"testsPort": 8899,
 	"config": {

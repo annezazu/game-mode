@@ -98,6 +98,9 @@ function getLabel( el ) {
 function findStylesSidebars() {
 	return document.querySelectorAll(
 		[
+			// WP 7.0+
+			'.editor-global-styles-sidebar',
+			// WP 6.x
 			'.edit-site-global-styles-sidebar',
 			'.edit-site-global-styles-screen-root',
 			'.edit-site-sidebar-edit-mode__panel',
@@ -105,6 +108,36 @@ function findStylesSidebars() {
 		].join( ',' )
 	);
 }
+
+function findRootScreens() {
+	return document.querySelectorAll(
+		[
+			// WP 7.0+
+			'.global-styles-ui-screen-root',
+			// WP 6.x
+			'.edit-site-global-styles-screen-root',
+		].join( ',' )
+	);
+}
+
+/**
+ * Stable Navigator.Button IDs assigned by core for the root menu items in
+ * WP 7.0+. Matching by ID is more robust than matching by visible text
+ * (which is localized) and survives small markup tweaks.
+ */
+const ALLOWED_IDS = new Set( [
+	'/variations', // "Browse styles"
+	'/typography',
+	'/colors',
+	'/background',
+] );
+const BLOCKED_IDS = new Set( [
+	'/shadows',
+	'/layout',
+	'/blocks',
+	'/css',
+	'/revisions',
+] );
 
 /**
  * Walk up from a target element to the wrapping list-item / navigator-row.
@@ -136,14 +169,11 @@ function isRootScreen( container ) {
 }
 
 function processStylesScreen() {
-	// Row-based hiding only on the root styles screen. The class is
-	// `.edit-site-global-styles-screen-root` and is unique to the root —
-	// detail screens (Typography, Colors, etc.) carry their own classes
-	// like `.edit-site-global-styles-screen-typography`. Hiding rows on
-	// detail screens would strip their inner controls.
-	const rootScreens = document.querySelectorAll(
-		'.edit-site-global-styles-screen-root'
-	);
+	// Row-based hiding only on the root styles screen. The wrapping class is
+	// unique to the root — detail screens (Typography, Colors, etc.) carry
+	// their own classes. Hiding rows on detail screens would strip their
+	// inner controls.
+	const rootScreens = findRootScreens();
 	rootScreens.forEach( ( screen ) => {
 		// Operate on leaf interactive nav items rather than wrapping rows.
 		// Reading text from a wrapper that contains every nav item makes
@@ -159,11 +189,19 @@ function processStylesScreen() {
 			if ( ! row || row.dataset.gameModeHidden === 'true' ) {
 				return;
 			}
-			const label = getLabel( item );
-			if ( ! label ) {
-				return;
+			const id = item.getAttribute && item.getAttribute( 'id' );
+			let allowed;
+			if ( id && ( ALLOWED_IDS.has( id ) || BLOCKED_IDS.has( id ) ) ) {
+				// Prefer stable Navigator.Button IDs (WP 7.0+) over labels.
+				allowed = ALLOWED_IDS.has( id );
+			} else {
+				const label = getLabel( item );
+				if ( ! label ) {
+					return;
+				}
+				allowed = isAllowed( label ) && ! isBlocked( label );
 			}
-			if ( isBlocked( label ) || ! isAllowed( label ) ) {
+			if ( ! allowed ) {
 				row.style.display = 'none';
 				row.dataset.gameModeHidden = 'true';
 			}
@@ -190,11 +228,25 @@ function processStylesScreen() {
 					const container =
 						el.closest( 'section' ) ||
 						el.closest( '.components-panel__body' ) ||
+						el.closest( '.components-card__body' ) ||
 						el.closest( '.components-h-stack' ) ||
 						el.parentElement ||
 						el;
 					container.style.display = 'none';
 					container.dataset.gameModeHidden = 'true';
+					// Also hide the preceding <hr> divider when present —
+					// otherwise we leave a stray separator above an empty
+					// region.
+					const prev = container.previousElementSibling;
+					if (
+						prev &&
+						( prev.tagName === 'HR' ||
+							prev.classList.contains(
+								'components-card__divider'
+							) )
+					) {
+						prev.style.display = 'none';
+					}
 					break;
 				}
 			}
