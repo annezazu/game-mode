@@ -16,12 +16,26 @@
  * resilient to internal class renames.
  */
 
-const ALLOWED = new Set( [
+const ALLOWED = [
 	'browse styles',
 	'colors',
 	'typography',
 	'background',
-] );
+];
+
+/**
+ * Explicit block-list of root-menu rows we never want to show in Easy mode.
+ * Belt-and-braces alongside the allow-list — newer Gutenberg builds keep
+ * adding entries (Shadows, Layout, Blocks, …) and we'd rather hide a known
+ * bad row by exact label than rely solely on allow-list misses.
+ */
+const BLOCKED_LABELS = [
+	'shadows',
+	'layout',
+	'blocks',
+	'css',
+	'revisions',
+];
 
 /**
  * Phrases that, if found anywhere in the styles sidebar, should hide their
@@ -35,16 +49,46 @@ const BLOCKED_PHRASES = [
 
 let observer = null;
 
+function normalize( s ) {
+	return ( s || '' ).replace( /\s+/g, ' ' ).trim().toLowerCase();
+}
+
 function isAllowed( label ) {
 	if ( ! label ) {
 		return false;
 	}
-	for ( const allowed of ALLOWED ) {
-		if ( label.startsWith( allowed ) ) {
-			return true;
+	return ALLOWED.some( ( allowed ) => label.startsWith( allowed ) );
+}
+
+function isBlocked( label ) {
+	if ( ! label ) {
+		return false;
+	}
+	return BLOCKED_LABELS.some(
+		( blocked ) => label === blocked || label.startsWith( blocked + ' ' )
+	);
+}
+
+/**
+ * Resolve an item's accessible label. Prefers aria-label / aria-labelledby,
+ * falls back to its own visible text. Critically does NOT walk up to a
+ * shared row — that would pick up sibling labels and incorrectly mark
+ * everything "allowed".
+ */
+function getLabel( el ) {
+	const aria = el.getAttribute && el.getAttribute( 'aria-label' );
+	if ( aria ) {
+		return normalize( aria );
+	}
+	const labelledBy =
+		el.getAttribute && el.getAttribute( 'aria-labelledby' );
+	if ( labelledBy ) {
+		const ref = document.getElementById( labelledBy );
+		if ( ref ) {
+			return normalize( ref.textContent );
 		}
 	}
-	return false;
+	return normalize( el.textContent );
 }
 
 /**
@@ -101,19 +145,25 @@ function processStylesScreen() {
 		'.edit-site-global-styles-screen-root'
 	);
 	rootScreens.forEach( ( screen ) => {
-		const candidates = screen.querySelectorAll(
-			'a, button, li, .components-item, [role="listitem"], div[role="button"]'
+		// Operate on leaf interactive nav items rather than wrapping rows.
+		// Reading text from a wrapper that contains every nav item makes
+		// every label look like a giant concatenated string and `startsWith`
+		// against the allow-list trivially matches "browse styles…",
+		// leaving nothing hidden. Individual buttons/links each carry their
+		// own label.
+		const items = screen.querySelectorAll(
+			'button, a[href], [role="button"]'
 		);
-		candidates.forEach( ( el ) => {
-			const row = findRow( el );
+		items.forEach( ( item ) => {
+			const row = findRow( item );
 			if ( ! row || row.dataset.gameModeHidden === 'true' ) {
 				return;
 			}
-			const label = ( row.textContent || '' ).trim().toLowerCase();
+			const label = getLabel( item );
 			if ( ! label ) {
 				return;
 			}
-			if ( ! isAllowed( label ) ) {
+			if ( isBlocked( label ) || ! isAllowed( label ) ) {
 				row.style.display = 'none';
 				row.dataset.gameModeHidden = 'true';
 			}
