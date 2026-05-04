@@ -62,7 +62,7 @@ export const LEVELS = {
 		changes: [
 			__( 'Every block at your fingertips', 'game-mode' ),
 			__( 'Full toolbar with list view and navigation', 'game-mode' ),
-			__( 'All standard styling controls available', 'game-mode' ),
+			__( 'All global styling options available', 'game-mode' ),
 			__( 'Patterns offer simplified editing', 'game-mode' ),
 		],
 		patternsContentOnly: true,
@@ -91,7 +91,7 @@ export const LEVELS = {
 		icon: shield,
 		accent: '#ef4444',
 		changes: [
-			__( 'Every styling control opened by default', 'game-mode' ),
+			__( 'All global styling options available', 'game-mode' ),
 			__( 'Patterns are fully open by default', 'game-mode' ),
 			__( 'All controls stay visible — no hidden options', 'game-mode' ),
 			__( 'Built for theme design and full rebuilds', 'game-mode' ),
