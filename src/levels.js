@@ -17,7 +17,7 @@ import { pencil, tool, shield } from '@wordpress/icons';
 export const LEVELS = {
 	easy: {
 		key: 'easy',
-		label: __( 'Quick', 'game-mode' ),
+		label: __( 'Light', 'game-mode' ),
 		tagline: __( 'Quick edits, no distractions.', 'game-mode' ),
 		description: __(
 			'Best when you just want to update text, swap an image, or tweak colors. Your theme\'s layout stays put so nothing breaks.',

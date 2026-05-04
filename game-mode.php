@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Game Mode
- * Description: Choose a difficulty level (Quick / Standard / Advanced) for the Site Editor experience.
+ * Description: Choose a difficulty level (Light / Standard / Advanced) for the Site Editor experience.
  * Version: 0.1.0
  * Requires at least: 6.5
  * Requires PHP: 7.4
