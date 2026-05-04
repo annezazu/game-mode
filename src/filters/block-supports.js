@@ -2,8 +2,10 @@
  * Two block-support filters, switched on by the active level:
  *
  * 1. `minimal` (Easy) — strip every block-support category from the inspector
- *    except color and typography.fontSize. Keeps the editor showing only
- *    those two controls.
+ *    except color and typography.fontSize, then expand
+ *    `__experimentalDefaultControls` on the survivors so every kept control
+ *    (e.g. Link color) renders up-front rather than hiding in the
+ *    ToolsPanel "more" menu.
  *
  * 2. `expanded` (Hard) — port and extend Create Block Theme PR #824:
  *    populate `__experimentalDefaultControls` for every support the block
@@ -159,7 +161,11 @@ export function registerBlockSupportsFilter( getLevel ) {
 				return settings;
 			}
 			if ( config.blockSupports === 'minimal' ) {
-				return { ...settings, supports: minimizeSupports( settings.supports ) };
+				const minimized = minimizeSupports( settings.supports );
+				return {
+					...settings,
+					supports: { ...minimized, ...expandDefaultControls( minimized ) },
+				};
 			}
 			if ( config.blockSupports === 'expanded' ) {
 				return {
