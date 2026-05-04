@@ -17,7 +17,7 @@ import { pencil, tool, shield } from '@wordpress/icons';
 export const LEVELS = {
 	easy: {
 		key: 'easy',
-		label: __( 'Easy', 'game-mode' ),
+		label: __( 'Light', 'game-mode' ),
 		tagline: __( 'Quick edits, no distractions.', 'game-mode' ),
 		description: __(
 			'Best when you just want to update text, swap an image, or tweak colors. Your theme\'s layout stays put so nothing breaks.',
@@ -26,10 +26,10 @@ export const LEVELS = {
 		icon: pencil,
 		accent: '#10b981',
 		changes: [
-			__( 'Theme blocks hidden from the inserter', 'game-mode' ),
-			__( 'Layout, dimensions, and border panels removed', 'game-mode' ),
-			__( 'Simplified topbar — no list view or breadcrumbs', 'game-mode' ),
-			__( 'Patterns lock as content-only so layouts stay intact', 'game-mode' ),
+			__( 'Only the essential blocks shown', 'game-mode' ),
+			__( 'Basic styling controls — complex ones hidden', 'game-mode' ),
+			__( 'Cleaner toolbar with fewer distractions', 'game-mode' ),
+			__( 'Patterns only allow basic edits', 'game-mode' ),
 		],
 		patternsContentOnly: true,
 		allowThemeBlocks: false,
@@ -51,7 +51,7 @@ export const LEVELS = {
 	},
 	medium: {
 		key: 'medium',
-		label: __( 'Medium', 'game-mode' ),
+		label: __( 'Standard', 'game-mode' ),
 		tagline: __( 'Make it your own.', 'game-mode' ),
 		description: __(
 			'Best when you want to add new sections, rearrange the page, or build something fresh — without redesigning the whole site.',
@@ -60,10 +60,10 @@ export const LEVELS = {
 		icon: tool,
 		accent: '#3b82f6',
 		changes: [
-			__( 'All blocks available, including theme blocks', 'game-mode' ),
-			__( 'List view, breadcrumbs, and block tools enabled', 'game-mode' ),
-			__( 'Standard block-support controls', 'game-mode' ),
-			__( 'Patterns still lock as content-only', 'game-mode' ),
+			__( 'Every block at your fingertips', 'game-mode' ),
+			__( 'Full toolbar with list view and navigation', 'game-mode' ),
+			__( 'All standard styling controls available', 'game-mode' ),
+			__( 'Patterns still allow basic edits only', 'game-mode' ),
 		],
 		patternsContentOnly: true,
 		allowThemeBlocks: true,
@@ -82,7 +82,7 @@ export const LEVELS = {
 	},
 	hard: {
 		key: 'hard',
-		label: __( 'Hard', 'game-mode' ),
+		label: __( 'Advanced', 'game-mode' ),
 		tagline: __( 'Full theme designer.', 'game-mode' ),
 		description: __(
 			'Best for designing or rebuilding a theme from scratch. Every control is expanded so you can fine-tune every detail.',
@@ -91,10 +91,10 @@ export const LEVELS = {
 		icon: shield,
 		accent: '#ef4444',
 		changes: [
-			__( 'Every block-support panel expanded by default', 'game-mode' ),
-			__( 'Patterns fully editable — no content-only lock', 'game-mode' ),
-			__( 'ToolsPanel ellipsis menu hidden so controls stay visible', 'game-mode' ),
-			__( 'Best for theme design and rebuilding from scratch', 'game-mode' ),
+			__( 'Every styling control opened by default', 'game-mode' ),
+			__( 'Patterns are fully editable', 'game-mode' ),
+			__( 'All controls stay visible — no hidden options', 'game-mode' ),
+			__( 'Built for theme design and full rebuilds', 'game-mode' ),
 		],
 		patternsContentOnly: false,
 		allowThemeBlocks: true,
