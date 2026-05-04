@@ -41,6 +41,7 @@ export const LEVELS = {
 			showSimpleTopbar: true,
 			showBlockHelpers: false,
 			themeStyles: true,
+			focusMode: true,
 		},
 	},
 	medium: {
@@ -66,6 +67,7 @@ export const LEVELS = {
 			showSimpleTopbar: true,
 			showBlockHelpers: true,
 			themeStyles: true,
+			focusMode: false,
 		},
 	},
 	hard: {
@@ -91,6 +93,7 @@ export const LEVELS = {
 			showSimpleTopbar: true,
 			showBlockHelpers: true,
 			themeStyles: true,
+			focusMode: false,
 		},
 	},
 };
