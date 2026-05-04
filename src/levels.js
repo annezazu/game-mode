@@ -87,7 +87,7 @@ export const LEVELS = {
 		label: __( 'Advanced', 'game-mode' ),
 		tagline: __( 'Full theme designer.', 'game-mode' ),
 		description: __(
-			'Best for designing or rebuilding a theme from scratch. Every control is expanded so you can fine-tune every detail.',
+			'Best for designing or rebuilding a theme from scratch. Every control is expanded by default so you can fine-tune layout, spacing, color, and typography down to the pixel.',
 			'game-mode'
 		),
 		icon: shield,
