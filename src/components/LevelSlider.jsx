@@ -25,6 +25,21 @@ export default function LevelSlider( { value, onChange } ) {
 	const stopRefs = useRef( {} );
 	const trackRef = useRef( null );
 
+	const percentForKey = useCallback(
+		( key ) => {
+			const idx = Math.max( 0, stops.indexOf( key ) );
+			return ( idx / ( stops.length - 1 ) ) * 100;
+		},
+		[ stops ]
+	);
+
+	// Free-floating thumb position. Keyboard / clicking a label snaps it to
+	// the label's anchor; dragging lets it stop wherever the pointer is
+	// released.
+	const [ thumbPercent, setThumbPercent ] = useState( () =>
+		percentForKey( value ?? stops[ 0 ] )
+	);
+
 	// Re-focus the active stop after a keyboard-driven change so arrow
 	// navigation feels continuous.
 	const lastValueRef = useRef( value );
@@ -38,29 +53,39 @@ export default function LevelSlider( { value, onChange } ) {
 	const previewedKey = hovered ?? value ?? stops[ 0 ];
 	const previewed = LEVELS[ previewedKey ];
 
-	const stopFromClientX = useCallback(
-		( clientX ) => {
-			const track = trackRef.current;
-			if ( ! track ) {
-				return value;
-			}
-			const rect = track.getBoundingClientRect();
-			const ratio = Math.max(
-				0,
-				Math.min( 1, ( clientX - rect.left ) / rect.width )
-			);
+	const percentFromClientX = useCallback( ( clientX ) => {
+		const track = trackRef.current;
+		if ( ! track ) {
+			return null;
+		}
+		const rect = track.getBoundingClientRect();
+		return Math.max(
+			0,
+			Math.min( 100, ( ( clientX - rect.left ) / rect.width ) * 100 )
+		);
+	}, [] );
+
+	const keyFromPercent = useCallback(
+		( pct ) => {
 			// Split the track into N equal regions so each level claims a
-			// third of the rail (e.g. 0–33% → Simple, 33–66% → Intermediate,
-			// 66–100% → Advanced) rather than the default nearest-stop rule
-			// which gives the middle stop half the rail.
+			// third of the rail (Simple 0–33%, Intermediate 33–66%,
+			// Advanced 66–100%).
 			const idx = Math.min(
 				stops.length - 1,
-				Math.floor( ratio * stops.length )
+				Math.floor( ( pct / 100 ) * stops.length )
 			);
 			return stops[ idx ];
 		},
-		[ stops, value ]
+		[ stops ]
 	);
+
+	// Snap the thumb to a labeled stop; used by clicks and keyboard.
+	const commitToKey = ( key ) => {
+		setThumbPercent( percentForKey( key ) );
+		if ( key !== value ) {
+			onChange( key );
+		}
+	};
 
 	const handlePointerDown = ( e ) => {
 		// Ignore clicks that originated on a stop button — those handle
@@ -72,9 +97,13 @@ export default function LevelSlider( { value, onChange } ) {
 		e.preventDefault();
 		e.currentTarget.setPointerCapture?.( e.pointerId );
 		setIsDragging( true );
-		const next = stopFromClientX( e.clientX );
-		if ( next !== value ) {
-			onChange( next );
+		const pct = percentFromClientX( e.clientX );
+		if ( pct !== null ) {
+			setThumbPercent( pct );
+			const next = keyFromPercent( pct );
+			if ( next !== value ) {
+				onChange( next );
+			}
 		}
 	};
 
@@ -82,7 +111,12 @@ export default function LevelSlider( { value, onChange } ) {
 		if ( ! isDragging ) {
 			return;
 		}
-		const next = stopFromClientX( e.clientX );
+		const pct = percentFromClientX( e.clientX );
+		if ( pct === null ) {
+			return;
+		}
+		setThumbPercent( pct );
+		const next = keyFromPercent( pct );
 		if ( next !== value ) {
 			onChange( next );
 		}
@@ -100,24 +134,23 @@ export default function LevelSlider( { value, onChange } ) {
 		const idx = stops.indexOf( key );
 		if ( e.key === 'ArrowRight' || e.key === 'ArrowDown' ) {
 			e.preventDefault();
-			onChange( stops[ Math.min( idx + 1, stops.length - 1 ) ] );
+			commitToKey( stops[ Math.min( idx + 1, stops.length - 1 ) ] );
 		} else if ( e.key === 'ArrowLeft' || e.key === 'ArrowUp' ) {
 			e.preventDefault();
-			onChange( stops[ Math.max( idx - 1, 0 ) ] );
+			commitToKey( stops[ Math.max( idx - 1, 0 ) ] );
 		} else if ( e.key === 'Home' ) {
 			e.preventDefault();
-			onChange( stops[ 0 ] );
+			commitToKey( stops[ 0 ] );
 		} else if ( e.key === 'End' ) {
 			e.preventDefault();
-			onChange( stops[ stops.length - 1 ] );
+			commitToKey( stops[ stops.length - 1 ] );
 		} else if ( e.key === 'Enter' || e.key === ' ' ) {
 			e.preventDefault();
-			onChange( key );
+			commitToKey( key );
 		}
 	};
 
-	const selectedIdx = Math.max( 0, stops.indexOf( value ) );
-	const fillPercent = ( selectedIdx / ( stops.length - 1 ) ) * 100;
+	const fillPercent = thumbPercent;
 
 	return (
 		<VStack spacing={ 5 }>
@@ -179,7 +212,7 @@ export default function LevelSlider( { value, onChange } ) {
 											? 0
 											: -1
 									}
-									onClick={ () => onChange( key ) }
+									onClick={ () => commitToKey( key ) }
 									onMouseEnter={ () => setHovered( key ) }
 									onMouseLeave={ () => setHovered( null ) }
 									onFocus={ () => setHovered( key ) }
