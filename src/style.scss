@@ -124,45 +124,33 @@ $switcher-z: 100000;
 
 	&__stop {
 		position: absolute;
-		top: 22px;
+		top: 34px;
 		transform: translateX(-50%);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 16px;
 		background: none;
 		border: none;
-		padding: 0;
+		padding: 4px 8px;
+		border-radius: 6px;
 		cursor: pointer;
 		color: var(--wp-components-color-foreground, #1e1e1e);
 		font: inherit;
-		transition: transform 120ms ease;
+		transition: color 120ms ease;
 
 		&:hover,
 		&.is-previewed {
-			.game-mode-level-slider__dot {
-				transform: scale(1.2);
-			}
-
 			.game-mode-level-slider__stop-label {
 				color: var(--stop-accent);
 			}
 		}
 
 		&:focus-visible {
-			outline: none;
-
-			.game-mode-level-slider__dot {
-				box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06), 0 0 0 5px var(--stop-accent);
-			}
+			outline: 2px solid var(--stop-accent);
+			outline-offset: 2px;
 		}
 
 		&.is-selected {
-			.game-mode-level-slider__dot {
-				background: var(--stop-accent);
-				border-color: var(--stop-accent);
-			}
-
 			.game-mode-level-slider__stop-label {
 				color: var(--stop-accent);
 				font-weight: 600;
@@ -171,13 +159,7 @@ $switcher-z: 100000;
 	}
 
 	&__dot {
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		background: #fff;
-		border: 2px solid var(--wp-components-color-gray-400, #949494);
-		transition: transform 120ms ease, background-color 120ms ease,
-			border-color 120ms ease, box-shadow 120ms ease;
+		display: none;
 	}
 
 	&__stop-label {
