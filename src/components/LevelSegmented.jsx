@@ -7,7 +7,6 @@ import {
 	__experimentalHeading as Heading,
 	Icon,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { LEVELS, LEVEL_KEYS } from '../levels';
@@ -15,19 +14,19 @@ import { LEVELS, LEVEL_KEYS } from '../levels';
 /**
  * Segmented-control level picker built on ToggleGroupControl.
  *
- * Hovering or focusing a segment previews the matching summary card
- * below. Clicking commits the selection.
+ * The summary card below always reflects the *committed* selection —
+ * hovering a segment doesn't preview its details. Users have to click
+ * a segment to see its summary, which encourages an intentional pick.
  */
 export default function LevelSegmented( { value, onChange } ) {
-	const [ hovered, setHovered ] = useState( null );
-	const previewedKey = hovered ?? value ?? LEVEL_KEYS[ 0 ];
-	const previewed = LEVELS[ previewedKey ];
+	const selectedKey = value ?? LEVEL_KEYS[ 0 ];
+	const selected = LEVELS[ selectedKey ];
 
 	return (
 		<VStack spacing={ 5 }>
 			<div
 				className="game-mode-level-segmented"
-				style={ { '--game-mode-accent': previewed.accent } }
+				style={ { '--game-mode-accent': selected.accent } }
 			>
 				<ToggleGroupControl
 					__next40pxDefaultSize
@@ -45,10 +44,6 @@ export default function LevelSegmented( { value, onChange } ) {
 								key={ key }
 								value={ key }
 								label={ level.label }
-								onMouseEnter={ () => setHovered( key ) }
-								onMouseLeave={ () => setHovered( null ) }
-								onFocus={ () => setHovered( key ) }
-								onBlur={ () => setHovered( null ) }
 							/>
 						);
 					} ) }
@@ -57,7 +52,7 @@ export default function LevelSegmented( { value, onChange } ) {
 
 			<div
 				className="game-mode-level-segmented__summary"
-				style={ { '--game-mode-accent': previewed.accent } }
+				style={ { '--game-mode-accent': selected.accent } }
 				aria-live="polite"
 			>
 				<HStack spacing={ 4 } alignment="flex-start">
@@ -65,32 +60,21 @@ export default function LevelSegmented( { value, onChange } ) {
 						className="game-mode-level-segmented__summary-icon"
 						aria-hidden="true"
 					>
-						<Icon icon={ previewed.icon } size={ 24 } />
+						<Icon icon={ selected.icon } size={ 24 } />
 					</span>
 					<VStack spacing={ 2 }>
-						<HStack spacing={ 2 } alignment="baseline" justify="flex-start">
-							<Heading level={ 3 } size={ 16 } weight={ 600 }>
-								{ previewed.label }
-							</Heading>
-							{ hovered && hovered !== value && (
-								<Text
-									variant="muted"
-									size={ 12 }
-									className="game-mode-level-segmented__preview-tag"
-								>
-									{ __( 'preview', 'game-mode' ) }
-								</Text>
-							) }
-						</HStack>
+						<Heading level={ 3 } size={ 16 } weight={ 600 }>
+							{ selected.label }
+						</Heading>
 						<Text size={ 13 } weight={ 500 }>
-							{ previewed.tagline }
+							{ selected.tagline }
 						</Text>
 						<Text variant="muted" size={ 13 }>
-							{ previewed.description }
+							{ selected.description }
 						</Text>
-						{ previewed.changes?.length > 0 && (
+						{ selected.changes?.length > 0 && (
 							<ul className="game-mode-level-segmented__changes">
-								{ previewed.changes.map( ( change ) => (
+								{ selected.changes.map( ( change ) => (
 									<li key={ change }>{ change }</li>
 								) ) }
 							</ul>
