@@ -58,15 +58,24 @@ $switcher-z: 100000;
 
 .game-mode-level-segmented {
 	// Tint the active segment in the level accent so the picker echoes
-	// the colors used elsewhere in the UI. Override hover/focus so the
-	// active segment keeps its white text on the accent background.
+	// the colors used elsewhere in the UI. The `!important` is needed to
+	// outweigh the toggle-group's own hover/focus rules, which otherwise
+	// flip the text to its dark default while the background stays
+	// accent-tinted (terrible contrast).
 	[role='radio'][aria-checked='true'] {
 		&,
 		&:hover,
 		&:focus,
-		&:focus-visible {
-			background: var(--game-mode-accent, var(--wp-admin-theme-color, #007cba));
-			color: #fff;
+		&:focus-visible,
+		&:active {
+			background: var(--game-mode-accent, var(--wp-admin-theme-color, #007cba)) !important;
+			color: #fff !important;
+
+			// The label is sometimes rendered in a nested span — force
+			// the same color there too so neither element fights us.
+			* {
+				color: #fff !important;
+			}
 		}
 	}
 
