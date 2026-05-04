@@ -49,7 +49,14 @@ export default function LevelSlider( { value, onChange } ) {
 				0,
 				Math.min( 1, ( clientX - rect.left ) / rect.width )
 			);
-			const idx = Math.round( ratio * ( stops.length - 1 ) );
+			// Split the track into N equal regions so each level claims a
+			// third of the rail (e.g. 0–33% → Simple, 33–66% → Intermediate,
+			// 66–100% → Advanced) rather than the default nearest-stop rule
+			// which gives the middle stop half the rail.
+			const idx = Math.min(
+				stops.length - 1,
+				Math.floor( ratio * stops.length )
+			);
 			return stops[ idx ];
 		},
 		[ stops, value ]
