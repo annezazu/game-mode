@@ -49,6 +49,17 @@ describe( 'minimizeSupports', () => {
 		} );
 	} );
 
+	it( 'composes with expandDefaultControls so Link color renders up-front', () => {
+		// Issue #14: Link was hiding in the ToolsPanel "more" menu in easy mode.
+		const minimized = minimizeSupports( {
+			color: { background: true, text: true, link: true },
+		} );
+		const merged = { ...minimized, ...expandDefaultControls( minimized ) };
+		expect( merged.color.__experimentalDefaultControls.link ).toBe( true );
+		expect( merged.color.__experimentalDefaultControls.text ).toBe( true );
+		expect( merged.color.__experimentalDefaultControls.background ).toBe( true );
+	} );
+
 	it( 'omits typography entirely when no fontSize support is declared', () => {
 		const out = minimizeSupports( {
 			typography: { lineHeight: true, fontFamily: true },
