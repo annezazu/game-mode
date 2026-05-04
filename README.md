@@ -1,6 +1,6 @@
 # Game Mode
 
-Choose a difficulty level for the WordPress Site Editor. Easy locks layout and shows only the basics. Medium gives you balanced editing. Hard unlocks every block-support control for full theme design.
+Choose a difficulty level for the WordPress Site Editor. Light locks layout and shows only the basics. Standard gives you balanced editing. Advanced unlocks every block-support control for full theme design.
 
 A persistent switcher in the bottom-right of the editor lets you change levels at any time.
 
@@ -8,7 +8,7 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 
 ## What each level does
 
-| | Easy | Medium | Hard |
+| | Light | Standard | Advanced |
 |---|---|---|---|
 | Patterns | content-only locked | content-only locked | unlocked |
 | Block-support controls | color + font size only | core defaults | every control expanded by default |
@@ -64,7 +64,7 @@ Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expan
 
 ## Architecture
 
-- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, REST endpoint mirroring the active level into user meta, server-side `register_block_pattern_args` filter that wraps patterns in a content-only Group for Easy/Medium.
+- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, REST endpoint mirroring the active level into user meta, server-side `register_block_pattern_args` filter that wraps patterns in a content-only Group for Light/Standard.
 - **JS bundle** (`src/`): React UI for the picker modal + bottom-right switcher (`@wordpress/components`), level configuration (`levels.js`), and a stack of `MutationObserver`/`subscribe()`-driven filters in `src/filters/` that hide-or-modify parts of the editor based on the active level.
 
 ## License

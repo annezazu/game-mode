@@ -17,7 +17,7 @@ import { pencil, tool, shield } from '@wordpress/icons';
 export const LEVELS = {
 	easy: {
 		key: 'easy',
-		label: __( 'Easy', 'game-mode' ),
+		label: __( 'Light', 'game-mode' ),
 		tagline: __( 'Quick edits, no distractions.', 'game-mode' ),
 		description: __(
 			'Best when you just want to update text, swap an image, or tweak colors. Your theme\'s layout stays put so nothing breaks.',
@@ -45,7 +45,7 @@ export const LEVELS = {
 	},
 	medium: {
 		key: 'medium',
-		label: __( 'Medium', 'game-mode' ),
+		label: __( 'Standard', 'game-mode' ),
 		tagline: __( 'Make it your own.', 'game-mode' ),
 		description: __(
 			'Best when you want to add new sections, rearrange the page, or build something fresh — without redesigning the whole site.',
@@ -70,7 +70,7 @@ export const LEVELS = {
 	},
 	hard: {
 		key: 'hard',
-		label: __( 'Hard', 'game-mode' ),
+		label: __( 'Advanced', 'game-mode' ),
 		tagline: __( 'Full theme designer.', 'game-mode' ),
 		description: __(
 			'Best for designing or rebuilding a theme from scratch. Every control is expanded so you can fine-tune every detail.',
