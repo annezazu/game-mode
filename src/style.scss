@@ -79,13 +79,7 @@ $switcher-z: 100000;
 		}
 	}
 
-	// Tint the outer border so the whole control echoes the level
-	// accent. The component renders its border via box-shadow on the
-	// outer wrapper, so we override both the static and focus states.
-	.components-toggle-group-control,
-	.components-toggle-group-control:focus-within {
-		box-shadow: inset 0 0 0 1px
-			var(--game-mode-accent, var(--wp-admin-theme-color, #007cba)) !important;
+	.components-toggle-group-control {
 		transition: box-shadow 200ms ease;
 	}
 
