@@ -17,7 +17,7 @@ import { pencil, tool, shield } from '@wordpress/icons';
 export const LEVELS = {
 	easy: {
 		key: 'easy',
-		label: __( 'Light', 'game-mode' ),
+		label: __( 'Simple', 'game-mode' ),
 		tagline: __( 'Quick edits, no distractions.', 'game-mode' ),
 		description: __(
 			'Best when you just want to update text, swap an image, or tweak colors. Your theme\'s layout stays put so nothing breaks.',
@@ -25,6 +25,12 @@ export const LEVELS = {
 		),
 		icon: pencil,
 		accent: '#10b981',
+		changes: [
+			__( 'Only the essential blocks shown', 'game-mode' ),
+			__( 'Basic styling controls — complex ones hidden', 'game-mode' ),
+			__( 'Cleaner toolbar with fewer distractions', 'game-mode' ),
+			__( 'Patterns offer simplified editing', 'game-mode' ),
+		],
 		patternsContentOnly: true,
 		allowThemeBlocks: false,
 		blockSupports: 'minimal',
@@ -46,7 +52,7 @@ export const LEVELS = {
 	},
 	medium: {
 		key: 'medium',
-		label: __( 'Standard', 'game-mode' ),
+		label: __( 'Intermediate', 'game-mode' ),
 		tagline: __( 'Make it your own.', 'game-mode' ),
 		description: __(
 			'Best when you want to add new sections, rearrange the page, or build something fresh — without redesigning the whole site.',
@@ -54,6 +60,12 @@ export const LEVELS = {
 		),
 		icon: tool,
 		accent: '#3b82f6',
+		changes: [
+			__( 'Every block at your fingertips', 'game-mode' ),
+			__( 'Full toolbar with list view and navigation', 'game-mode' ),
+			__( 'All global styling options available', 'game-mode' ),
+			__( 'Patterns offer simplified editing', 'game-mode' ),
+		],
 		patternsContentOnly: true,
 		allowThemeBlocks: true,
 		blockSupports: 'default',
@@ -80,6 +92,12 @@ export const LEVELS = {
 		),
 		icon: shield,
 		accent: '#ef4444',
+		changes: [
+			__( 'All global styling options available', 'game-mode' ),
+			__( 'Patterns are fully open by default', 'game-mode' ),
+			__( 'All controls stay visible — no hidden options', 'game-mode' ),
+			__( 'Built for theme design and full rebuilds', 'game-mode' ),
+		],
 		patternsContentOnly: false,
 		allowThemeBlocks: true,
 		blockSupports: 'expanded',
