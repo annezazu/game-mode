@@ -8,8 +8,8 @@ import {
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import { LEVELS } from '../levels';
-import LevelCard from './LevelCard';
+import { DEFAULT_LEVEL } from '../levels';
+import LevelSegmented from './LevelSegmented';
 
 /**
  * @param {Object}   props
@@ -26,7 +26,7 @@ export default function LevelPickerModal( {
 	onConfirm,
 	onClose,
 } ) {
-	const [ pending, setPending ] = useState( currentLevel );
+	const [ pending, setPending ] = useState( currentLevel ?? DEFAULT_LEVEL );
 
 	const blocking = isFirstRun;
 
@@ -47,18 +47,7 @@ export default function LevelPickerModal( {
 						'game-mode'
 					) }
 				</Text>
-				<div role="radiogroup" aria-label={ __( 'Difficulty level', 'game-mode' ) }>
-					<VStack spacing={ 3 }>
-						{ Object.values( LEVELS ).map( ( level ) => (
-							<LevelCard
-								key={ level.key }
-								level={ level }
-								isSelected={ pending === level.key }
-								onSelect={ setPending }
-							/>
-						) ) }
-					</VStack>
-				</div>
+				<LevelSegmented value={ pending } onChange={ setPending } />
 				<HStack justify="flex-end" spacing={ 2 }>
 					{ ! blocking && (
 						<Button variant="tertiary" onClick={ onClose }>
