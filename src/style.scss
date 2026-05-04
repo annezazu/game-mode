@@ -58,11 +58,11 @@ $switcher-z: 100000;
 
 .game-mode-level-slider {
 	position: relative;
-	padding: 4px 12px 0;
+	padding: 4px 0 0;
 
 	&__track-area {
 		position: relative;
-		padding: 24px 12px 8px;
+		padding: 16px 44px 12px;
 		cursor: grab;
 		touch-action: none;
 		user-select: none;
@@ -76,11 +76,18 @@ $switcher-z: 100000;
 		cursor: grabbing;
 	}
 
+	// Shared coordinate space: the track, thumb, and stops are all
+	// positioned within this rail. 0% = leftmost stop, 100% = rightmost.
+	&__track-rail {
+		position: relative;
+		height: 56px;
+	}
+
 	&__track {
 		position: absolute;
-		left: 24px;
-		right: 24px;
-		top: 32px;
+		left: 0;
+		right: 0;
+		top: 8px;
 		height: 6px;
 		border-radius: 999px;
 		background: var(--wp-components-color-gray-200, #e0e0e0);
@@ -96,7 +103,7 @@ $switcher-z: 100000;
 
 	&__thumb {
 		position: absolute;
-		top: 35px;
+		top: 11px;
 		width: 22px;
 		height: 22px;
 		border-radius: 50%;
@@ -115,22 +122,17 @@ $switcher-z: 100000;
 		box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 	}
 
-	&__stops {
-		position: relative;
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		padding-top: 18px;
-	}
-
 	&__stop {
+		position: absolute;
+		top: 22px;
+		transform: translateX(-50%);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 8px;
 		background: none;
 		border: none;
-		padding: 4px 8px 0;
+		padding: 0;
 		cursor: pointer;
 		color: var(--wp-components-color-foreground, #1e1e1e);
 		font: inherit;
@@ -181,6 +183,7 @@ $switcher-z: 100000;
 	&__stop-label {
 		font-size: 13px;
 		line-height: 1.2;
+		white-space: nowrap;
 		transition: color 120ms ease;
 	}
 

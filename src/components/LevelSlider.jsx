@@ -123,29 +123,36 @@ export default function LevelSlider( { value, onChange } ) {
 				style={ { '--game-mode-accent': previewed.accent } }
 			>
 				<div
-					ref={ trackRef }
 					className="game-mode-level-slider__track-area"
 					onPointerDown={ handlePointerDown }
 					onPointerMove={ handlePointerMove }
 					onPointerUp={ handlePointerUp }
 					onPointerCancel={ handlePointerUp }
 				>
-					<div className="game-mode-level-slider__track" aria-hidden="true">
-						<div
-							className="game-mode-level-slider__fill"
-							style={ { width: `${ fillPercent }%` } }
-						/>
-					</div>
 					<div
-						className="game-mode-level-slider__thumb"
-						style={ { left: `${ fillPercent }%` } }
-						aria-hidden="true"
-					/>
-					<div className="game-mode-level-slider__stops">
-						{ stops.map( ( key ) => {
+						ref={ trackRef }
+						className="game-mode-level-slider__track-rail"
+					>
+						<div
+							className="game-mode-level-slider__track"
+							aria-hidden="true"
+						>
+							<div
+								className="game-mode-level-slider__fill"
+								style={ { width: `${ fillPercent }%` } }
+							/>
+						</div>
+						<div
+							className="game-mode-level-slider__thumb"
+							style={ { left: `${ fillPercent }%` } }
+							aria-hidden="true"
+						/>
+						{ stops.map( ( key, idx ) => {
 							const level = LEVELS[ key ];
 							const isSelected = value === key;
 							const isPreviewed = previewedKey === key;
+							const stopPercent =
+								( idx / ( stops.length - 1 ) ) * 100;
 							return (
 								<button
 									key={ key }
@@ -154,7 +161,10 @@ export default function LevelSlider( { value, onChange } ) {
 									className={ `game-mode-level-slider__stop${
 										isSelected ? ' is-selected' : ''
 									}${ isPreviewed ? ' is-previewed' : '' }` }
-									style={ { '--stop-accent': level.accent } }
+									style={ {
+										'--stop-accent': level.accent,
+										left: `${ stopPercent }%`,
+									} }
 									role="radio"
 									aria-checked={ isSelected }
 									tabIndex={
