@@ -1,18 +1,17 @@
 /**
- * Light mode: lock removal on every block in the canvas.
+ * Light mode: lock removal on root-level blocks in the canvas.
  *
  * Guardrail so a stray Backspace or "Delete" in the options menu can't
- * wipe out an entire pattern or section. Applies to root AND nested blocks.
+ * wipe out an entire pattern or section. Only the top-level blocks are
+ * locked — inner blocks are intentionally left alone.
  *
- * Implementation:
- *   1. Subscribe to the block editor.
- *   2. Walk every client ID recursively.
- *   3. For any block whose `attributes.lock.remove` isn't already true,
- *      mark the next change as non-persistent and set it.
- *
- * Non-persistent means the lock is editor-only — it never writes back to
- * post content, so leaving Light mode (or opening the post in another
- * editor) restores normal behaviour.
+ * Why root-only:
+ *   - Walking into pattern (`core/block`) or template-part inner blocks
+ *     and mutating their `lock` attribute writes to the *pattern* entity
+ *     (not the post), so the lock can be persisted into the saved pattern
+ *     markup and survive a level switch back to Advanced (issue #17).
+ *   - Cheaper: subscription fires constantly, so a single shallow pass is
+ *     much less work than a recursive walk on every state change.
  *
  * Move is intentionally NOT locked — only removal.
  *
@@ -25,16 +24,6 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 
 let unsubscribe = null;
 
-function walkClientIds( editor, clientIds, visit ) {
-	clientIds.forEach( ( id ) => {
-		visit( id );
-		const inner = editor.getBlockOrder( id );
-		if ( inner.length ) {
-			walkClientIds( editor, inner, visit );
-		}
-	} );
-}
-
 function applyLocks() {
 	const editor = select( blockEditorStore );
 	if ( ! editor ) {
@@ -42,7 +31,7 @@ function applyLocks() {
 	}
 	const blockEditor = dispatch( blockEditorStore );
 	const rootIds = editor.getBlockOrder();
-	walkClientIds( editor, rootIds, ( clientId ) => {
+	rootIds.forEach( ( clientId ) => {
 		const block = editor.getBlock( clientId );
 		if ( ! block ) {
 			return;
