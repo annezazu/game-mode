@@ -1,6 +1,6 @@
 # Game Mode
 
-Choose a difficulty level for the WordPress Site Editor. Light locks layout and shows only the basics. Standard gives you balanced editing. Advanced unlocks every block-support control for full theme design.
+Choose a difficulty level for the WordPress Site Editor. **Simple** locks layout and shows only the basics. **Intermediate** gives you balanced editing. **Advanced** unlocks every block-support control for full theme design.
 
 A persistent switcher in the bottom-right of the editor lets you change levels at any time.
 
@@ -8,16 +8,18 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 
 ## What each level does
 
-| | Light | Standard | Advanced |
+| | Simple | Intermediate | Advanced |
 |---|---|---|---|
 | Patterns | content-only locked | content-only locked | unlocked |
 | Block-support controls | color + font size only | core defaults | every control expanded by default |
+| Focus mode (`focusMode` core preference) | on | off | off |
 | Distraction-free | minimal chrome (helpers off) | normal | normal |
 | Theme blocks (Query Loop, Post Title, …) | hidden from inserter | available | available |
 | Inserter tabs | Patterns only | all tabs | all tabs |
 | Block-directory installs | disabled | disabled | enabled |
 | Styles sidebar | Browse styles + Colors + Typography + Background only | full | full |
 | Pattern editing UX | locked unless "Edit pattern" clicked | locked unless "Edit pattern" clicked | auto-unlocked |
+| Lock-removal on root blocks | locked (Backspace can't wipe a section) | unlocked | unlocked |
 
 ## Install
 
@@ -64,7 +66,7 @@ Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expan
 
 ## Architecture
 
-- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, REST endpoint mirroring the active level into user meta, server-side `register_block_pattern_args` filter that wraps patterns in a content-only Group for Light/Standard.
+- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, REST endpoint mirroring the active level into user meta, server-side `register_block_pattern_args` filter that wraps patterns in a content-only Group for Simple/Intermediate.
 - **JS bundle** (`src/`): React UI for the picker modal + bottom-right switcher (`@wordpress/components`), level configuration (`levels.js`), and a stack of `MutationObserver`/`subscribe()`-driven filters in `src/filters/` that hide-or-modify parts of the editor based on the active level.
 
 ## License
