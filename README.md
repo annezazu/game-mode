@@ -67,6 +67,29 @@ Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expan
 - **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, REST endpoint mirroring the active level into user meta, server-side `register_block_pattern_args` filter that wraps patterns in a content-only Group for Light/Standard.
 - **JS bundle** (`src/`): React UI for the picker modal + bottom-right switcher (`@wordpress/components`), level configuration (`levels.js`), and a stack of `MutationObserver`/`subscribe()`-driven filters in `src/filters/` that hide-or-modify parts of the editor based on the active level.
 
+## Stability — experimental Gutenberg APIs in use
+
+This plugin reaches into a number of `__experimental*` and `__unstable*` APIs from the Gutenberg packages. Those carry no compatibility guarantee — they can be renamed or removed in any release without a deprecation cycle. The list below is the surface area to watch when bumping `@wordpress/*` deps:
+
+| API | File | What breaks if it goes away |
+|---|---|---|
+| `__experimentalGetDirtyEntityRecords` (`core` store) | `src/index.js` | Unsaved-changes guard before reload — falls back to no warning |
+| `__experimentalConfirmDialog` (`@wordpress/components`) | `src/index.js` | The "Save before switching?" dialog stops rendering |
+| `__unstableMotion` / `__unstableAnimatePresence` (`@wordpress/components`) | `src/components/LevelSwitcher.jsx` | Switcher icon swap goes from animated → instant |
+| `__unstableMarkNextChangeAsNotPersistent` (`core/block-editor` dispatch) | `src/filters/easy-lock-remove.js` | Lock-remove writes get marked as user edits, dirtying the post |
+| `__experimentalGetAllowedPatterns` (`core/block-editor` selector) | n/a directly today, but used by patterns observer | Pattern list filtering can no-op |
+| `setBlockEditingMode` / `getBlockEditingMode` / `unsetBlockEditingMode` | `src/filters/hard-no-content-only.js` | Pattern auto-unlock in Advanced stops working |
+| `__experimentalText` / `__experimentalHeading` / `__experimentalVStack` / `__experimentalHStack` (`@wordpress/components`) | `LevelCard`, `LevelPickerModal` | Build error — these are not optional, swap with stable `Text`/`Heading`/`Flex` if removed |
+
+In addition, several filters depend on **DOM-text matching against editor labels** (e.g. matching panel headers by their visible "Layout" / "Edit pattern" text). Those break in non-English locales and on label changes:
+
+- `src/filters/easy-block-inspector.js` — "Edit pattern", "Styles", "Layout", "Dimensions", "Border", "Position", "Shadow", "Background", "Advanced"
+- `src/filters/easy-styles-menu.js` — "Browse styles", "Colors", "Typography", "Background", + the "customize the appearance of specific blocks" description
+- `src/filters/hard-no-content-only.js` — "Edit pattern"
+- `src/filters/easy-patterns-only-inserter.js` — "Patterns"
+
+Also worth noting: `showSimpleTopbar` and `showBlockHelpers` in `src/levels.js` mirror an unmerged Gutenberg PR ([#74546](https://github.com/WordPress/gutenberg/pull/74546)). On stock WordPress they are no-ops; the visual effect is provided by the CSS in `src/filters/distraction-free-config.js`.
+
 ## License
 
 GPL-2.0-or-later.
