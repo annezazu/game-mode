@@ -11,6 +11,8 @@
  * match.
  */
 
+import { getObserverTarget } from './observer-target';
+
 let observer = null;
 const STYLES_TAB_PROCESSED = 'data-game-mode-styles-activated';
 const PANEL_HIDDEN = 'data-game-mode-panel-hidden';
@@ -163,5 +165,8 @@ export function setupEasyBlockInspector( level ) {
 			hidePanelsByLabel( el );
 		} );
 	} );
-	observer.observe( document.body, { childList: true, subtree: true } );
+	const target = getObserverTarget();
+	if ( target ) {
+		observer.observe( target, { childList: true, subtree: true } );
+	}
 }
