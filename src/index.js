@@ -25,6 +25,7 @@ import { setupEasyStylesMenu } from './filters/easy-styles-menu';
 import { setupEasyBlockInspector } from './filters/easy-block-inspector';
 import { setupBlockDirectoryControl } from './filters/block-directory';
 import { setupHardNoContentOnly } from './filters/hard-no-content-only';
+import { setupPatternContentOnly } from './filters/pattern-content-only';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
 import LevelPickerModal from './components/LevelPickerModal';
 import LevelSwitcher from './components/LevelSwitcher';
@@ -79,6 +80,7 @@ if ( cachedLevel ) {
 	setupEasyBlockInspector( cachedLevel );
 	setupBlockDirectoryControl( cachedLevel );
 	setupHardNoContentOnly( cachedLevel );
+	setupPatternContentOnly( cachedLevel );
 	setupEasyLockRemove( cachedLevel );
 	// Re-apply core preferences for the active level on every boot so
 	// `distractionFree`, `showListView`, etc. reflect the level instead of
@@ -124,6 +126,7 @@ function GameModeUI() {
 			setupEasyBlockInspector( level );
 			setupBlockDirectoryControl( level );
 			setupHardNoContentOnly( level );
+			setupPatternContentOnly( level );
 			setupEasyLockRemove( level );
 		}
 	}, [ level ] );
