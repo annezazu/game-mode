@@ -57,10 +57,14 @@ export function useSetLevel() {
 			set( SCOPE, KEY, level );
 			applyCorePrefsFor( level, dispatch );
 			try {
+				// Write to the user meta via the canonical /wp/v2/users/me
+				// endpoint. The meta key is registered server-side via
+				// `register_meta` in game-mode.php, which exposes it through
+				// the standard REST surface — no custom route required.
 				await apiFetch( {
-					path: '/game-mode/v1/level',
+					path: '/wp/v2/users/me',
 					method: 'POST',
-					data: { level },
+					data: { meta: { game_mode_level: level } },
 				} );
 			} catch ( e ) {
 				// REST failed — client and server are now out of sync. The
