@@ -1,5 +1,5 @@
 /**
- * Easy mode: when the inserter opens, hide every tab except Patterns and
+ * Simple mode: when the inserter opens, hide every tab except Patterns and
  * auto-select Patterns. Implemented as a one-shot MutationObserver so we
  * react to the inserter mounting without polling.
  *

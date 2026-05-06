@@ -68,7 +68,7 @@ registerBlockSupportsFilter( getLevel );
 registerThemeBlocksInserterFilter( getLevel );
 
 // Apply distraction-free CSS as soon as the document is ready and tag the
-// body so level-scoped CSS rules (like Hard mode's "no hidden controls") fire.
+// body so level-scoped CSS rules (like Advanced mode's "no hidden controls") fire.
 if ( cachedLevel ) {
 	applyDistractionFreeConfig( cachedLevel );
 	if ( typeof document !== 'undefined' ) {

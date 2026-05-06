@@ -1,6 +1,6 @@
 /**
  * Bundles the configurable distraction-free pieces from Gutenberg PR #74546
- * into the plugin so Easy/Medium can offer gradation today.
+ * into the plugin so Simple/Intermediate can offer gradation today.
  *
  * Two new sub-preferences:
  * - `showSimpleTopbar` — when false, hide inserter/list-view/zoom toggles.

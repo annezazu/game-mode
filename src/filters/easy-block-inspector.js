@@ -1,5 +1,5 @@
 /**
- * Easy mode block inspector restrictions:
+ * Simple mode block inspector restrictions:
  *
  * 1. Auto-select the Styles tab when the inspector tabs render (so the user
  *    doesn't land on a hidden Settings tab and see an empty inspector).
@@ -104,7 +104,7 @@ function activateStylesTab( root ) {
 		stylesTab.click();
 	}
 	// After activation, hide the entire tablist — only Styles is meaningful
-	// in Easy mode. Defer so framer-motion / focus management isn't disrupted.
+	// in Simple mode. Defer so framer-motion / focus management isn't disrupted.
 	if ( tablist ) {
 		setTimeout( () => {
 			hideAccessibly( tablist );

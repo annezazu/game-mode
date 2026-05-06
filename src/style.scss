@@ -213,7 +213,7 @@ $switcher-z: 100000;
 	}
 }
 
-// Easy mode: keep the inserter button accessible (so users can browse
+// Simple mode: keep the inserter button accessible (so users can browse
 // patterns) but suppress the other topbar affordances and hide the
 // non-Patterns tabs in the inserter sidebar. JS observer in
 // easy-patterns-only-inserter.js auto-selects the Patterns tab.
@@ -266,7 +266,7 @@ body[data-game-mode="easy"] {
 	}
 }
 
-// Hard mode: keep every block-support control visible and prevent the user
+// Advanced mode: keep every block-support control visible and prevent the user
 // from collapsing them via the ToolsPanel ellipsis menu.
 body[data-game-mode="hard"] {
 	.components-tools-panel-header,
