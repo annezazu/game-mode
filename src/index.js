@@ -80,14 +80,22 @@ if ( cachedLevel ) {
 	setupBlockDirectoryControl( cachedLevel );
 	setupHardNoContentOnly( cachedLevel );
 	setupEasyLockRemove( cachedLevel );
-	// Re-apply core preferences for the active level on every boot so
+	// Re-apply preferences for the active level on every boot so
 	// `distractionFree`, `showListView`, etc. reflect the level instead of
-	// whatever the user had set last session.
+	// whatever the user had set last session. We dispatch into two scopes:
+	//   - `core` for editor-wide prefs (the bulk in `cfg.prefs`).
+	//   - `core/edit-site` for Site Editor-specific prefs (e.g.
+	//     `enableChoosePatternModal`).
 	const cfg = LEVELS[ cachedLevel ];
 	if ( cfg ) {
-		Object.entries( cfg.prefs ).forEach( ( [ name, value ] ) => {
+		Object.entries( cfg.prefs || {} ).forEach( ( [ name, value ] ) => {
 			try {
 				dispatch( preferencesStore ).set( 'core', name, value );
+			} catch ( e ) {}
+		} );
+		Object.entries( cfg.editSitePrefs || {} ).forEach( ( [ name, value ] ) => {
+			try {
+				dispatch( preferencesStore ).set( 'core/edit-site', name, value );
 			} catch ( e ) {}
 		} );
 	}
