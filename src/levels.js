@@ -20,16 +20,16 @@ export const LEVELS = {
 		label: __( 'Simple', 'game-mode' ),
 		tagline: __( 'Quick edits, no distractions.', 'game-mode' ),
 		description: __(
-			'Best when you just want to update text, swap an image, or tweak colors. Your theme\'s layout stays put so nothing breaks.',
+			'Best when you want to update text, swap an image, or refresh colors without worrying about breaking the layout your theme set up for you.',
 			'game-mode'
 		),
 		icon: pencil,
 		accent: '#10b981',
 		changes: [
-			__( 'Only the essential blocks shown', 'game-mode' ),
-			__( 'Basic styling controls — complex ones hidden', 'game-mode' ),
-			__( 'Cleaner toolbar with fewer distractions', 'game-mode' ),
-			__( 'Patterns offer simplified editing', 'game-mode' ),
+			__( 'Edit text, images, and colors inside the existing layout', 'game-mode' ),
+			__( 'Work with a focused set of everyday blocks', 'game-mode' ),
+			__( 'Adjust basic styling like color and font size', 'game-mode' ),
+			__( 'Drop in patterns and edit their content', 'game-mode' ),
 		],
 		patternsContentOnly: true,
 		allowThemeBlocks: false,
@@ -53,18 +53,18 @@ export const LEVELS = {
 	medium: {
 		key: 'medium',
 		label: __( 'Intermediate', 'game-mode' ),
-		tagline: __( 'Make it your own.', 'game-mode' ),
+		tagline: __( 'Build pages your way.', 'game-mode' ),
 		description: __(
-			'Best when you want to add new sections, rearrange the page, or build something fresh — without redesigning the whole site.',
+			'Best when you want to add new sections, rearrange a page, or create something fresh — while keeping the overall site design intact.',
 			'game-mode'
 		),
 		icon: tool,
 		accent: '#3b82f6',
 		changes: [
-			__( 'Every block at your fingertips', 'game-mode' ),
-			__( 'Full toolbar with list view and navigation', 'game-mode' ),
-			__( 'All global styling options available', 'game-mode' ),
-			__( 'Patterns offer simplified editing', 'game-mode' ),
+			__( 'Add, remove, and rearrange any block on the page', 'game-mode' ),
+			__( 'Use every block, including theme blocks like Query Loop and Post Title', 'game-mode' ),
+			__( 'Fine-tune styling with the full set of standard controls', 'game-mode' ),
+			__( 'Patterns open to content edits by default — unlock the layout anytime', 'game-mode' ),
 		],
 		patternsContentOnly: true,
 		allowThemeBlocks: true,
@@ -85,18 +85,18 @@ export const LEVELS = {
 	hard: {
 		key: 'hard',
 		label: __( 'Advanced', 'game-mode' ),
-		tagline: __( 'Full theme designer.', 'game-mode' ),
+		tagline: __( 'Design the whole theme.', 'game-mode' ),
 		description: __(
-			'Best for designing or rebuilding a theme from scratch. Every control is expanded by default so you can fine-tune layout, spacing, color, and typography down to the pixel.',
+			'Best when you\'re designing or rebuilding a theme from scratch. Every control is open so you can shape layout, spacing, color, and typography down to the pixel.',
 			'game-mode'
 		),
 		icon: shield,
 		accent: '#ef4444',
 		changes: [
-			__( 'All global styling options available', 'game-mode' ),
-			__( 'Patterns are fully open by default', 'game-mode' ),
-			__( 'All controls stay visible — no hidden options', 'game-mode' ),
-			__( 'Built for theme design and full rebuilds', 'game-mode' ),
+			__( 'Fine-tune layout, spacing, color, and typography on every block', 'game-mode' ),
+			__( 'Edit every part of any pattern, fully unlocked by default', 'game-mode' ),
+			__( 'Reach every styling control without digging through menus', 'game-mode' ),
+			__( 'Install new blocks from the block directory', 'game-mode' ),
 		],
 		patternsContentOnly: false,
 		allowThemeBlocks: true,
