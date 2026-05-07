@@ -26,6 +26,7 @@ import { setupEasyBlockInspector } from './filters/easy-block-inspector';
 import { setupBlockDirectoryControl } from './filters/block-directory';
 import { setupHardNoContentOnly } from './filters/hard-no-content-only';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
+import { setupAdvancedListView } from './filters/advanced-list-view';
 import LevelPickerModal from './components/LevelPickerModal';
 import LevelSwitcher from './components/LevelSwitcher';
 
@@ -80,6 +81,7 @@ if ( cachedLevel ) {
 	setupBlockDirectoryControl( cachedLevel );
 	setupHardNoContentOnly( cachedLevel );
 	setupEasyLockRemove( cachedLevel );
+	setupAdvancedListView( cachedLevel );
 	// Re-apply preferences for the active level on every boot so
 	// `distractionFree`, `showListView`, etc. reflect the level instead of
 	// whatever the user had set last session. We dispatch into two scopes:
@@ -133,6 +135,7 @@ function GameModeUI() {
 			setupBlockDirectoryControl( level );
 			setupHardNoContentOnly( level );
 			setupEasyLockRemove( level );
+			setupAdvancedListView( level );
 		}
 	}, [ level ] );
 

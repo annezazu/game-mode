@@ -297,18 +297,11 @@ body[data-game-mode="easy"] {
 	}
 }
 
-// Advanced mode: keep every block-support control visible and prevent the user
-// from collapsing them via the ToolsPanel ellipsis menu.
-body[data-game-mode="hard"] {
-	.components-tools-panel-header,
-	.components-tools-panel__header {
-		.components-dropdown-menu,
-		button[aria-label*="View" i][aria-haspopup="true"],
-		button[aria-label*="options" i][aria-haspopup="true"] {
-			display: none !important;
-		}
-	}
-}
+// Advanced mode: every block-support control is expanded by default
+// (via `expandDefaultControls` in src/filters/block-supports.js). The
+// ToolsPanel ellipsis menu intentionally stays available so users can
+// hide individual controls if they want — Advanced should give *more*
+// surface, not lock the user out of the panel's own affordances.
 
 .game-mode-confirm-discard {
 	background: none;
