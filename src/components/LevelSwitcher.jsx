@@ -31,7 +31,6 @@ export default function LevelSwitcher( { level, onChange, onOpenPicker } ) {
 				config.label
 			) }
 			onClick={ onToggle }
-			style={ { '--game-mode-accent': config.accent } }
 		>
 			<AnimatePresence mode="wait" initial={ false }>
 				<motion.span
@@ -74,6 +73,7 @@ export default function LevelSwitcher( { level, onChange, onOpenPicker } ) {
 			className="game-mode-switcher"
 			role="region"
 			aria-label={ __( 'Game mode', 'game-mode' ) }
+			style={ { '--game-mode-accent': config.accent } }
 		>
 			<span
 				className="game-mode-switcher__grip"
