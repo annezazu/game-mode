@@ -10,13 +10,27 @@ import { registerPlugin } from '@wordpress/plugins';
 import { dispatch, select, useSelect } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as coreStore } from '@wordpress/core-data';
-import { useState, useEffect, useCallback, createPortal } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	useCallback,
+	createPortal,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/components';
 
+import { Kilim } from 'kilimjs';
+
 import { LEVELS, LEVEL_KEYS } from './levels';
-import { useLevel, useSetLevel, SCOPE, KEY } from './store';
+import {
+	useLevel,
+	useSetLevel,
+	useSwitcherGeometry,
+	useSetSwitcherGeometry,
+	SCOPE,
+	KEY,
+} from './store';
 import { registerBlockSupportsFilter } from './filters/block-supports';
 import { registerThemeBlocksInserterFilter } from './filters/theme-blocks-inserter';
 import { applyDistractionFreeConfig } from './filters/distraction-free-config';
@@ -41,7 +55,8 @@ import './style.scss';
  * this point in the bundle's execution.
  */
 function readInitialLevel() {
-	const fromWindow = typeof window !== 'undefined' ? window.gameModeInitial : null;
+	const fromWindow =
+		typeof window !== 'undefined' ? window.gameModeInitial : null;
 	if ( LEVEL_KEYS.includes( fromWindow ) ) {
 		return fromWindow;
 	}
@@ -109,7 +124,8 @@ if ( cachedLevel ) {
  */
 function hasUnsavedEdits() {
 	try {
-		const dirty = select( coreStore ).__experimentalGetDirtyEntityRecords?.() || [];
+		const dirty =
+			select( coreStore ).__experimentalGetDirtyEntityRecords?.() || [];
 		return dirty.length > 0;
 	} catch ( e ) {
 		return false;
@@ -119,6 +135,8 @@ function hasUnsavedEdits() {
 function GameModeUI() {
 	const level = useLevel();
 	const setLevel = useSetLevel();
+	const savedGeometry = useSwitcherGeometry();
+	const setSwitcherGeometry = useSetSwitcherGeometry();
 	const [ pickerOpen, setPickerOpen ] = useState( false );
 	const [ pendingSwitch, setPendingSwitch ] = useState( null ); // { next, wasFirstRun }
 
@@ -204,15 +222,24 @@ function GameModeUI() {
 			return;
 		}
 		try {
-			const dirty = select( coreStore ).__experimentalGetDirtyEntityRecords?.() || [];
+			const dirty =
+				select( coreStore ).__experimentalGetDirtyEntityRecords?.() ||
+				[];
 			await Promise.all(
 				dirty.map( ( { kind, name, key } ) =>
-					dispatch( coreStore ).saveEditedEntityRecord( kind, name, key )
+					dispatch( coreStore ).saveEditedEntityRecord(
+						kind,
+						name,
+						key
+					)
 				)
 			);
 		} catch ( e ) {
 			dispatch( noticesStore ).createErrorNotice(
-				__( 'Could not save before switching. Please try again.', 'game-mode' ),
+				__(
+					'Could not save before switching. Please try again.',
+					'game-mode'
+				),
 				{ type: 'snackbar' }
 			);
 			setPendingSwitch( null );
@@ -278,11 +305,20 @@ function GameModeUI() {
 				</ConfirmDialog>
 			) }
 			{ level && (
-				<LevelSwitcher
-					level={ level }
-					onChange={ handleSwitcherChange }
-					onOpenPicker={ () => setPickerOpen( true ) }
-				/>
+				<Kilim
+					className="game-mode-switcher__kilim"
+					initialGeometry={
+						savedGeometry ?? [ 'bottom-right', 16, 16, 180, 56 ]
+					}
+					resizable={ false }
+					onMoveEnd={ setSwitcherGeometry }
+				>
+					<LevelSwitcher
+						level={ level }
+						onChange={ handleSwitcherChange }
+						onOpenPicker={ () => setPickerOpen( true ) }
+					/>
+				</Kilim>
 			) }
 		</>,
 		document.body
