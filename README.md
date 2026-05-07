@@ -16,6 +16,7 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 | Distraction-free | minimal chrome (helpers off) | normal | normal |
 | Theme blocks (Query Loop, Post Title, …) | hidden from inserter | available | available |
 | Inserter tabs | Patterns only | all tabs | all tabs |
+| Choose-pattern modal on new pages (`enableChoosePatternModal`) | enabled | enabled | disabled |
 | Block-directory installs | disabled | disabled | enabled |
 | Styles sidebar | Browse styles + Colors + Typography + Background only | full | full |
 | Pattern editing UX | locked unless "Edit pattern" clicked | locked unless "Edit pattern" clicked | auto-unlocked |
