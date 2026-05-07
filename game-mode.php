@@ -122,3 +122,38 @@ function game_mode_register_rest() {
 	);
 }
 add_action( 'rest_api_init', 'game_mode_register_rest' );
+
+/**
+ * Expose the active level via the canonical `block_editor_settings_all`
+ * filter so any block-editor context (post editor, site editor, or
+ * future Gutenberg-powered editors) can read it through the standard
+ * settings surface, instead of via the bespoke `window.gameModeInitial`
+ * global script.
+ *
+ * The legacy `wp_add_inline_script` path in `game_mode_enqueue_assets`
+ * is kept for now — `getSettings()` resolves after editor mount, while
+ * our JS bundle reads the level synchronously at module load. Eventually
+ * we want to migrate to a single source of truth here.
+ *
+ * Also lays groundwork for a future PR that moves
+ * `__experimentalDefaultControls` per-level expansion to PHP via
+ * `register_block_type_args` (see issue #22, item 11).
+ *
+ * @param array $settings Editor settings.
+ * @return array Filtered settings.
+ */
+function game_mode_filter_block_editor_settings( $settings ) {
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return $settings;
+	}
+	$level = get_user_meta( $user_id, 'game_mode_level', true );
+	if ( ! in_array( $level, array( 'easy', 'medium', 'hard' ), true ) ) {
+		return $settings;
+	}
+	$settings['gameMode'] = array(
+		'level' => $level,
+	);
+	return $settings;
+}
+add_filter( 'block_editor_settings_all', 'game_mode_filter_block_editor_settings' );
