@@ -38,11 +38,15 @@ export default function LevelSwitcher( { level, onChange, onOpenPicker } ) {
 					key={ level }
 					className="game-mode-switcher__icon"
 					initial={
-						reducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.6 }
+						reducedMotion
+							? { opacity: 1 }
+							: { opacity: 0, scale: 0.6 }
 					}
 					animate={ { opacity: 1, scale: 1 } }
 					exit={
-						reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }
+						reducedMotion
+							? { opacity: 0 }
+							: { opacity: 0, scale: 0.6 }
 					}
 					transition={ { duration: reducedMotion ? 0 : 0.2 } }
 					aria-hidden="true"
@@ -55,7 +59,10 @@ export default function LevelSwitcher( { level, onChange, onOpenPicker } ) {
 				className="game-mode-switcher__label"
 				initial={ reducedMotion ? false : { opacity: 0, x: -6 } }
 				animate={ { opacity: 1, x: 0 } }
-				transition={ { duration: reducedMotion ? 0 : 0.2, delay: 0.05 } }
+				transition={ {
+					duration: reducedMotion ? 0 : 0.2,
+					delay: 0.05,
+				} }
 			>
 				{ config.label }
 			</motion.span>
@@ -63,7 +70,30 @@ export default function LevelSwitcher( { level, onChange, onOpenPicker } ) {
 	);
 
 	return (
-		<div className="game-mode-switcher" role="region" aria-label={ __( 'Game mode', 'game-mode' ) }>
+		<div
+			className="game-mode-switcher"
+			role="region"
+			aria-label={ __( 'Game mode', 'game-mode' ) }
+		>
+			<span
+				className="game-mode-switcher__grip"
+				aria-hidden="true"
+				title={ __( 'Drag to move', 'game-mode' ) }
+			>
+				<svg
+					width="10"
+					height="16"
+					viewBox="0 0 10 16"
+					focusable="false"
+				>
+					<circle cx="2" cy="3" r="1.2" />
+					<circle cx="8" cy="3" r="1.2" />
+					<circle cx="2" cy="8" r="1.2" />
+					<circle cx="8" cy="8" r="1.2" />
+					<circle cx="2" cy="13" r="1.2" />
+					<circle cx="8" cy="13" r="1.2" />
+				</svg>
+			</span>
 			<Dropdown
 				popoverProps={ { placement: 'top-end', offset: 8 } }
 				renderToggle={ renderToggle }
