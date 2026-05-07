@@ -16,6 +16,8 @@
  * resilient to internal class renames.
  */
 
+import { getObserverTarget } from './observer-target';
+
 const ALLOWED = [
 	'browse styles',
 	'colors',
@@ -265,7 +267,10 @@ export function setupEasyStylesMenu( level ) {
 	observer = new MutationObserver( () => {
 		processStylesScreen();
 	} );
-	observer.observe( document.body, { childList: true, subtree: true } );
+	const target = getObserverTarget();
+	if ( target ) {
+		observer.observe( target, { childList: true, subtree: true } );
+	}
 	// Run once in case the styles sidebar is already mounted.
 	processStylesScreen();
 }

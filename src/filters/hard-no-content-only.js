@@ -22,6 +22,8 @@
 import { select, dispatch, subscribe } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
+import { getObserverTarget } from './observer-target';
+
 let unsubscribe = null;
 
 function clearContentOnly( clientId, attributes ) {
@@ -108,6 +110,9 @@ export function setupHardNoContentOnly( level ) {
 	domObserver = new MutationObserver( () => {
 		autoClickEditPattern();
 	} );
-	domObserver.observe( document.body, { childList: true, subtree: true } );
+	const target = getObserverTarget();
+	if ( target ) {
+		domObserver.observe( target, { childList: true, subtree: true } );
+	}
 	autoClickEditPattern();
 }
