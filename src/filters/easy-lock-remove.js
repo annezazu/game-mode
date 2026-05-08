@@ -47,14 +47,53 @@ function applyLocks() {
 	} );
 }
 
+/**
+ * Clear any `lock.remove === true` we previously set on root blocks.
+ *
+ * Locks live on each block's `attributes.lock` object. When switching from
+ * Simple to a less-restricted level the watcher stops, but the lock state
+ * already written to the canvas persists. Without this, container blocks
+ * stay locked-for-remove in Intermediate / Advanced.
+ *
+ * Scope: root-level blocks only, mirroring what `applyLocks` writes.
+ */
+function clearLocks() {
+	const editor = select( blockEditorStore );
+	if ( ! editor ) {
+		return;
+	}
+	const blockEditor = dispatch( blockEditorStore );
+	const rootIds = editor.getBlockOrder();
+	rootIds.forEach( ( clientId ) => {
+		const block = editor.getBlock( clientId );
+		if ( ! block ) {
+			return;
+		}
+		const currentLock = block.attributes?.lock;
+		if ( ! currentLock || currentLock.remove !== true ) {
+			return;
+		}
+		// Strip our flag, keep any other lock keys (move, etc.) the user set.
+		const { remove: _ignore, ...rest } = currentLock;
+		const nextLock = Object.keys( rest ).length ? rest : undefined;
+		blockEditor.__unstableMarkNextChangeAsNotPersistent?.();
+		blockEditor.updateBlockAttributes( clientId, { lock: nextLock } );
+	} );
+}
+
 export function setupEasyLockRemove( level ) {
 	if ( unsubscribe ) {
 		unsubscribe();
 		unsubscribe = null;
 	}
-	if ( level !== 'easy' || typeof window === 'undefined' ) {
+	if ( typeof window === 'undefined' ) {
 		return;
 	}
-	unsubscribe = subscribe( applyLocks, blockEditorStore );
-	applyLocks();
+	if ( level === 'easy' ) {
+		unsubscribe = subscribe( applyLocks, blockEditorStore );
+		applyLocks();
+		return;
+	}
+	// Non-Simple level — clean up any locks we left behind.
+	clearLocks();
 }
