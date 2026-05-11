@@ -1,14 +1,12 @@
 /**
- * Open the document list view by default for levels that benefit from it.
+ * Open the document list view by default on editor mount.
  *
- * - Simple: list view doubles as a structure overview for users who are
- *   just editing content within an existing layout.
- * - Advanced: designers expect every tool open and reachable.
- *
- * `showListView` (in the level's `prefs`) governs the *preference* — it
- * decides whether the toggle is visible / on by default. To actually open
- * the list view panel on editor mount we dispatch `setIsListViewOpened`
- * on the relevant store.
+ * User feedback consistently shows List View helps people get a sense of
+ * the structure of their site, so we open it automatically across every
+ * level. `showListView` (in each level's `prefs`) governs the *preference*
+ * — it decides whether the toggle is visible / on by default. To actually
+ * open the list view panel we dispatch `setIsListViewOpened` on the
+ * relevant store.
  *
  * The action moved between stores across recent WordPress releases
  * (`core/edit-post` → `core/edit-site` → `core/editor`), so we dispatch
@@ -23,8 +21,6 @@ const STORES_WITH_LIST_VIEW = [
 	'core/edit-site',
 	'core/edit-post',
 ];
-
-const LEVELS_WITH_AUTO_LIST_VIEW = [ 'easy', 'hard' ];
 
 let opened = false;
 
@@ -48,7 +44,7 @@ function openListView() {
 
 export function setupAutoListView( level ) {
 	opened = false;
-	if ( ! LEVELS_WITH_AUTO_LIST_VIEW.includes( level ) ) {
+	if ( ! level ) {
 		return;
 	}
 	openListView();
