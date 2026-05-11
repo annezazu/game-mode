@@ -64,11 +64,11 @@ The bundled `.wp-env.json` pins WordPress to a recent release and mounts this di
 npm test
 ```
 
-Jest unit tests cover `expandDefaultControls` (the Advanced ToolsPanel helper).
+Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expandDefaultControls`).
 
 ## Architecture
 
-- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, registered user meta (`game_mode_level`) exposed through `/wp/v2/users/me`, and three server-side curation layers — `allowed_block_types_all` for theme-block hiding on Simple, `block_editor_settings_all` for per-level editor settings (`codeEditingEnabled`, `disableContentOnlyForUnsyncedPatterns`), and `wp_theme_json_data_default` for Simple's inspector-control curation (turns off appearance-tools, advanced typography, border/shadow/dimensions/position/background/spacing — leaving color + font-size).
+- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, registered user meta (`game_mode_level`) exposed through `/wp/v2/users/me`, and three server-side curation layers — `allowed_block_types_all` for theme-block hiding on Simple, `block_editor_settings_all` for per-level editor settings (`codeEditingEnabled`, `disableContentOnlyForUnsyncedPatterns`), and `wp_theme_json_data_user` for Simple's declarative settings constraints (appearance-tools off, advanced typography keys off, etc.). The theme.json layer is belt-and-braces on top of `minimizeSupports` — settings can't gate the ToolsPanel "more" menu, only the default-visible set.
 - **JS bundle** (`src/`): React UI for the picker modal + bottom-right switcher (`@wordpress/components`), level configuration (`levels.js`), and a stack of `MutationObserver`/`subscribe()`-driven filters in `src/filters/` that hide-or-modify parts of the editor based on the active level.
 
 ## Stability — experimental Gutenberg APIs in use
