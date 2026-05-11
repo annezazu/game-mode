@@ -1,17 +1,17 @@
 /**
  * Two block-support filters, switched on by the active level:
  *
- * 1. `minimal` (Easy) — strip every block-support category from the inspector
+ * 1. `minimal` (Simple) — strip every block-support category from the inspector
  *    except color and typography.fontSize, then expand
  *    `__experimentalDefaultControls` on the survivors so every kept control
  *    (e.g. Link color) renders up-front rather than hiding in the
  *    ToolsPanel "more" menu.
  *
- * 2. `expanded` (Hard) — port and extend Create Block Theme PR #824:
+ * 2. `expanded` (Advanced) — port and extend Create Block Theme PR #824:
  *    populate `__experimentalDefaultControls` for every support the block
  *    declares, so each control is visible by default in the ToolsPanel.
  *
- * `default` (Medium) is a no-op.
+ * `default` (Intermediate) is a no-op.
  */
 
 import { addFilter } from '@wordpress/hooks';

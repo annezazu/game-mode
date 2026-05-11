@@ -10,13 +10,27 @@ import { registerPlugin } from '@wordpress/plugins';
 import { dispatch, select, useSelect } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as coreStore } from '@wordpress/core-data';
-import { useState, useEffect, useCallback, createPortal } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	useCallback,
+	createPortal,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/components';
 
+import { Kilim } from 'kilimjs';
+
 import { LEVELS, LEVEL_KEYS } from './levels';
-import { useLevel, useSetLevel, SCOPE, KEY } from './store';
+import {
+	useLevel,
+	useSetLevel,
+	useSwitcherGeometry,
+	useSetSwitcherGeometry,
+	SCOPE,
+	KEY,
+} from './store';
 import { registerBlockSupportsFilter } from './filters/block-supports';
 import { registerThemeBlocksInserterFilter } from './filters/theme-blocks-inserter';
 import { applyDistractionFreeConfig } from './filters/distraction-free-config';
@@ -27,6 +41,7 @@ import { setupBlockDirectoryControl } from './filters/block-directory';
 import { setupHardNoContentOnly } from './filters/hard-no-content-only';
 import { setupPatternContentOnly } from './filters/pattern-content-only';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
+import { setupAdvancedListView } from './filters/advanced-list-view';
 import LevelPickerModal from './components/LevelPickerModal';
 import LevelSwitcher from './components/LevelSwitcher';
 
@@ -41,7 +56,8 @@ import './style.scss';
  * this point in the bundle's execution.
  */
 function readInitialLevel() {
-	const fromWindow = typeof window !== 'undefined' ? window.gameModeInitial : null;
+	const fromWindow =
+		typeof window !== 'undefined' ? window.gameModeInitial : null;
 	if ( LEVEL_KEYS.includes( fromWindow ) ) {
 		return fromWindow;
 	}
@@ -68,28 +84,66 @@ if ( cachedLevel ) {
 registerBlockSupportsFilter( getLevel );
 registerThemeBlocksInserterFilter( getLevel );
 
-// Apply distraction-free CSS as soon as the document is ready and tag the
-// body so level-scoped CSS rules (like Hard mode's "no hidden controls") fire.
-if ( cachedLevel ) {
-	applyDistractionFreeConfig( cachedLevel );
+/**
+ * Apply / re-apply all level-driven editor effects.
+ *
+ * `setupHardNoContentOnly`, `setupPatternContentOnly`, and `setupEasyLockRemove`
+ * each install a `@wordpress/data` subscription on `core/block-editor` that
+ * dispatches back into the same store when blocks need their editing mode or
+ * `lock` attribute updated. If two of those subscribers are alive at the same
+ * time (e.g. an "easy" pattern subscriber running while we set up the "hard"
+ * subscriber on a level switch), each can keep re-triggering the other and
+ * blow the call stack inside `combinedReducer`.
+ *
+ * To avoid that, this helper runs in two phases:
+ *
+ *   1. Tear down every subscribing filter (passing `null` makes each
+ *      `setup*` short-circuit after `unsubscribe()`).
+ *   2. Set up the filters appropriate to the new level. Because no foreign
+ *      subscriber is active during phase 2, the initial walks do not
+ *      cross-talk with stale subscriptions.
+ */
+function applyLevelEffects( level ) {
+	// Phase 1: tear down dispatch-causing subscribers.
+	setupHardNoContentOnly( null );
+	setupPatternContentOnly( null );
+	setupEasyLockRemove( null );
+
+	// Phase 2: set up for the new level.
+	applyDistractionFreeConfig( level );
 	if ( typeof document !== 'undefined' ) {
-		document.body.dataset.gameMode = cachedLevel;
+		document.body.dataset.gameMode = level;
 	}
-	setupEasyPatternsOnly( cachedLevel );
-	setupEasyStylesMenu( cachedLevel );
-	setupEasyBlockInspector( cachedLevel );
-	setupBlockDirectoryControl( cachedLevel );
-	setupHardNoContentOnly( cachedLevel );
-	setupPatternContentOnly( cachedLevel );
-	setupEasyLockRemove( cachedLevel );
-	// Re-apply core preferences for the active level on every boot so
+	setupEasyPatternsOnly( level );
+	setupEasyStylesMenu( level );
+	setupEasyBlockInspector( level );
+	setupBlockDirectoryControl( level );
+	setupAdvancedListView( level );
+	setupHardNoContentOnly( level );
+	setupPatternContentOnly( level );
+	setupEasyLockRemove( level );
+}
+
+// Apply distraction-free CSS as soon as the document is ready and tag the
+// body so level-scoped CSS rules (like Advanced mode's "no hidden controls") fire.
+if ( cachedLevel ) {
+	applyLevelEffects( cachedLevel );
+	// Re-apply preferences for the active level on every boot so
 	// `distractionFree`, `showListView`, etc. reflect the level instead of
-	// whatever the user had set last session.
+	// whatever the user had set last session. We dispatch into two scopes:
+	//   - `core` for editor-wide prefs (the bulk in `cfg.prefs`).
+	//   - `core/edit-site` for Site Editor-specific prefs (e.g.
+	//     `enableChoosePatternModal`).
 	const cfg = LEVELS[ cachedLevel ];
 	if ( cfg ) {
-		Object.entries( cfg.prefs ).forEach( ( [ name, value ] ) => {
+		Object.entries( cfg.prefs || {} ).forEach( ( [ name, value ] ) => {
 			try {
 				dispatch( preferencesStore ).set( 'core', name, value );
+			} catch ( e ) {}
+		} );
+		Object.entries( cfg.editSitePrefs || {} ).forEach( ( [ name, value ] ) => {
+			try {
+				dispatch( preferencesStore ).set( 'core/edit-site', name, value );
 			} catch ( e ) {}
 		} );
 	}
@@ -101,7 +155,8 @@ if ( cachedLevel ) {
  */
 function hasUnsavedEdits() {
 	try {
-		const dirty = select( coreStore ).__experimentalGetDirtyEntityRecords?.() || [];
+		const dirty =
+			select( coreStore ).__experimentalGetDirtyEntityRecords?.() || [];
 		return dirty.length > 0;
 	} catch ( e ) {
 		return false;
@@ -111,6 +166,8 @@ function hasUnsavedEdits() {
 function GameModeUI() {
 	const level = useLevel();
 	const setLevel = useSetLevel();
+	const savedGeometry = useSwitcherGeometry();
+	const setSwitcherGeometry = useSetSwitcherGeometry();
 	const [ pickerOpen, setPickerOpen ] = useState( false );
 	const [ pendingSwitch, setPendingSwitch ] = useState( null ); // { next, wasFirstRun }
 
@@ -119,15 +176,7 @@ function GameModeUI() {
 	useEffect( () => {
 		if ( level ) {
 			cachedLevel = level;
-			applyDistractionFreeConfig( level );
-			document.body.dataset.gameMode = level;
-			setupEasyPatternsOnly( level );
-			setupEasyStylesMenu( level );
-			setupEasyBlockInspector( level );
-			setupBlockDirectoryControl( level );
-			setupHardNoContentOnly( level );
-			setupPatternContentOnly( level );
-			setupEasyLockRemove( level );
+			applyLevelEffects( level );
 		}
 	}, [ level ] );
 
@@ -196,15 +245,24 @@ function GameModeUI() {
 			return;
 		}
 		try {
-			const dirty = select( coreStore ).__experimentalGetDirtyEntityRecords?.() || [];
+			const dirty =
+				select( coreStore ).__experimentalGetDirtyEntityRecords?.() ||
+				[];
 			await Promise.all(
 				dirty.map( ( { kind, name, key } ) =>
-					dispatch( coreStore ).saveEditedEntityRecord( kind, name, key )
+					dispatch( coreStore ).saveEditedEntityRecord(
+						kind,
+						name,
+						key
+					)
 				)
 			);
 		} catch ( e ) {
 			dispatch( noticesStore ).createErrorNotice(
-				__( 'Could not save before switching. Please try again.', 'game-mode' ),
+				__(
+					'Could not save before switching. Please try again.',
+					'game-mode'
+				),
 				{ type: 'snackbar' }
 			);
 			setPendingSwitch( null );
@@ -270,11 +328,20 @@ function GameModeUI() {
 				</ConfirmDialog>
 			) }
 			{ level && (
-				<LevelSwitcher
-					level={ level }
-					onChange={ handleSwitcherChange }
-					onOpenPicker={ () => setPickerOpen( true ) }
-				/>
+				<Kilim
+					className="game-mode-switcher__kilim"
+					initialGeometry={
+						savedGeometry ?? [ 'bottom-right', 16, 16, 180, 56 ]
+					}
+					resizable={ false }
+					onMoveEnd={ setSwitcherGeometry }
+				>
+					<LevelSwitcher
+						level={ level }
+						onChange={ handleSwitcherChange }
+						onOpenPicker={ () => setPickerOpen( true ) }
+					/>
+				</Kilim>
 			) }
 		</>,
 		document.body

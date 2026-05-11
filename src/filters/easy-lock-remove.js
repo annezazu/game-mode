@@ -1,5 +1,5 @@
 /**
- * Light mode: lock removal on root-level blocks in the canvas.
+ * Simple mode: lock removal on root-level blocks in the canvas.
  *
  * Guardrail so a stray Backspace or "Delete" in the options menu can't
  * wipe out an entire pattern or section. Only the top-level blocks are

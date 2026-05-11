@@ -42,12 +42,15 @@ export const LEVELS = {
 			fixedToolbar: false,
 			showListView: false,
 			showBlockBreadcrumbs: false,
-			showBlockTools: false,
 			showIconLabels: false,
 			showSimpleTopbar: true,
 			showBlockHelpers: false,
 			themeStyles: true,
 			focusMode: true,
+		},
+		editSitePrefs: {
+			// Pattern-first onboarding for the most constrained level.
+			enableChoosePatternModal: true,
 		},
 	},
 	medium: {
@@ -74,12 +77,17 @@ export const LEVELS = {
 			fixedToolbar: false,
 			showListView: true,
 			showBlockBreadcrumbs: true,
-			showBlockTools: true,
 			showIconLabels: false,
 			showSimpleTopbar: true,
 			showBlockHelpers: true,
 			themeStyles: true,
 			focusMode: false,
+		},
+		// Preferences that live in the `core/edit-site` scope rather than `core`.
+		editSitePrefs: {
+			// Make new pages always start from a pattern — the Intermediate
+			// mental model is "compose pages from patterns".
+			enableChoosePatternModal: true,
 		},
 	},
 	hard: {
@@ -106,12 +114,16 @@ export const LEVELS = {
 			fixedToolbar: false,
 			showListView: true,
 			showBlockBreadcrumbs: true,
-			showBlockTools: true,
 			showIconLabels: false,
 			showSimpleTopbar: true,
 			showBlockHelpers: true,
 			themeStyles: true,
 			focusMode: false,
+		},
+		editSitePrefs: {
+			// Designers don't want the choose-pattern prompt — let them
+			// drop into a blank canvas.
+			enableChoosePatternModal: false,
 		},
 	},
 };

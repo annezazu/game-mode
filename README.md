@@ -1,6 +1,6 @@
 # Game Mode
 
-Choose a difficulty level for the WordPress Site Editor. Light locks layout and shows only the basics. Standard gives you balanced editing. Advanced unlocks every block-support control for full theme design.
+Choose a difficulty level for the WordPress Site Editor. **Simple** locks layout and shows only the basics. **Intermediate** gives you balanced editing. **Advanced** unlocks every block-support control for full theme design.
 
 A persistent switcher in the bottom-right of the editor lets you change levels at any time.
 
@@ -8,16 +8,19 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 
 ## What each level does
 
-| | Light | Standard | Advanced |
+| | Simple | Intermediate | Advanced |
 |---|---|---|---|
 | Patterns | content-only locked | content-only locked | unlocked |
 | Block-support controls | color + font size only | core defaults | every control expanded by default |
+| Focus mode (`focusMode` core preference) | on | off | off |
 | Distraction-free | minimal chrome (helpers off) | normal | normal |
 | Theme blocks (Query Loop, Post Title, …) | hidden from inserter | available | available |
 | Inserter tabs | Patterns only | all tabs | all tabs |
+| Choose-pattern modal on new pages (`enableChoosePatternModal`) | enabled | enabled | disabled |
 | Block-directory installs | disabled | disabled | enabled |
 | Styles sidebar | Browse styles + Colors + Typography + Background only | full | full |
 | Pattern editing UX | locked unless "Edit pattern" clicked | locked unless "Edit pattern" clicked | auto-unlocked |
+| Lock-removal on root blocks | locked (Backspace can't wipe a section) | unlocked | unlocked |
 
 ## Install
 
@@ -66,6 +69,29 @@ Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expan
 
 - **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, registered user meta (`game_mode_level`) exposed through the canonical `/wp/v2/users/me` endpoint, and an `allowed_block_types_all` filter that hides theme blocks from the inserter when the user is on Simple level. Pattern content-only locking is now done at runtime in JS (`src/filters/pattern-content-only.js`) — no more server-side mutation of registered pattern content.
 - **JS bundle** (`src/`): React UI for the picker modal + bottom-right switcher (`@wordpress/components`), level configuration (`levels.js`), and a stack of `MutationObserver`/`subscribe()`-driven filters in `src/filters/` that hide-or-modify parts of the editor based on the active level.
+
+## Stability — experimental Gutenberg APIs in use
+
+This plugin reaches into a number of `__experimental*` and `__unstable*` APIs from the Gutenberg packages. Those carry no compatibility guarantee — they can be renamed or removed in any release without a deprecation cycle. The list below is the surface area to watch when bumping `@wordpress/*` deps:
+
+| API | File | What breaks if it goes away |
+|---|---|---|
+| `__experimentalGetDirtyEntityRecords` (`core` store) | `src/index.js` | Unsaved-changes guard before reload — falls back to no warning |
+| `__experimentalConfirmDialog` (`@wordpress/components`) | `src/index.js` | The "Save before switching?" dialog stops rendering |
+| `__unstableMotion` / `__unstableAnimatePresence` (`@wordpress/components`) | `src/components/LevelSwitcher.jsx` | Switcher icon swap goes from animated → instant |
+| `__unstableMarkNextChangeAsNotPersistent` (`core/block-editor` dispatch) | `src/filters/easy-lock-remove.js` | Lock-remove writes get marked as user edits, dirtying the post |
+| `__experimentalGetAllowedPatterns` (`core/block-editor` selector) | n/a directly today, but used by patterns observer | Pattern list filtering can no-op |
+| `setBlockEditingMode` / `getBlockEditingMode` / `unsetBlockEditingMode` | `src/filters/hard-no-content-only.js` | Pattern auto-unlock in Advanced stops working |
+| `__experimentalText` / `__experimentalHeading` / `__experimentalVStack` / `__experimentalHStack` (`@wordpress/components`) | `LevelCard`, `LevelPickerModal` | Build error — these are not optional, swap with stable `Text`/`Heading`/`Flex` if removed |
+
+In addition, several filters depend on **DOM-text matching against editor labels** (e.g. matching panel headers by their visible "Layout" / "Edit pattern" text). Those break in non-English locales and on label changes:
+
+- `src/filters/easy-block-inspector.js` — "Edit pattern", "Styles", "Layout", "Dimensions", "Border", "Position", "Shadow", "Background", "Advanced"
+- `src/filters/easy-styles-menu.js` — "Browse styles", "Colors", "Typography", "Background", + the "customize the appearance of specific blocks" description
+- `src/filters/hard-no-content-only.js` — "Edit pattern"
+- `src/filters/easy-patterns-only-inserter.js` — "Patterns"
+
+Also worth noting: `showSimpleTopbar` and `showBlockHelpers` in `src/levels.js` mirror an unmerged Gutenberg PR ([#74546](https://github.com/WordPress/gutenberg/pull/74546)). On stock WordPress they are no-ops; the visual effect is provided by the CSS in `src/filters/distraction-free-config.js`.
 
 ## License
 

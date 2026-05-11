@@ -1,5 +1,5 @@
 /**
- * Hard mode: ensure patterns are NOT content-only.
+ * Advanced mode: ensure patterns are NOT content-only.
  *
  * WP 7.0 introduced "Pattern Editing mode" — patterns get a special
  * `getBlockEditingMode()` of `'contentOnly'` on the pattern's own client
@@ -7,7 +7,7 @@
  * PRs 73677 / 73679). The lock is no longer just an attribute — it's tracked
  * separately via `setBlockEditingMode( clientId, mode )`.
  *
- * For Hard mode we want full editing, so we:
+ * For Advanced mode we want full editing, so we:
  *   1. Subscribe to the block editor.
  *   2. Walk every client ID in the canvas (recursive).
  *   3. For each block whose editing mode is `'contentOnly'`, dispatch
@@ -22,20 +22,31 @@
 import { select, dispatch, subscribe } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
+import { getObserverTarget } from './observer-target';
+
 let unsubscribe = null;
 
 function clearContentOnly( clientId, attributes ) {
 	if ( attributes?.templateLock !== 'contentOnly' ) {
 		return;
 	}
-	dispatch( blockEditorStore ).updateBlockAttributes( clientId, {
+	const blockEditor = dispatch( blockEditorStore );
+	// Mark non-persistent so this clear doesn't dirty the post — otherwise
+	// switching levels triggers the browser's "leave site?" dialog instead
+	// of our own save-before-switching prompt.
+	blockEditor.__unstableMarkNextChangeAsNotPersistent?.();
+	blockEditor.updateBlockAttributes( clientId, {
 		templateLock: undefined,
 	} );
 }
 
 function clearEditingMode( editor, clientId ) {
 	const mode = editor.getBlockEditingMode?.( clientId );
-	if ( mode === 'contentOnly' || mode === 'disabled' ) {
+	// Catch every non-default mode WP 7.0's pattern-editing UX may apply,
+	// not just `contentOnly` / `disabled`. The pattern wrapper often lands
+	// with mode === undefined briefly while core resolves it; we want to
+	// pin it to `default` either way.
+	if ( mode && mode !== 'default' ) {
 		dispatch( blockEditorStore ).setBlockEditingMode?.( clientId, 'default' );
 	}
 }
@@ -69,7 +80,7 @@ function walkAndClear() {
 /**
  * In WP 7.0, the inspector renders an "Edit pattern" button on pattern
  * blocks. Clicking it converts the block from rendered-pattern (which has
- * contentOnly editing) into raw editable blocks. In Hard mode we want that
+ * contentOnly editing) into raw editable blocks. In Advanced mode we want that
  * conversion to happen automatically the moment the user selects the block.
  */
 let domObserver = null;
@@ -108,6 +119,9 @@ export function setupHardNoContentOnly( level ) {
 	domObserver = new MutationObserver( () => {
 		autoClickEditPattern();
 	} );
-	domObserver.observe( document.body, { childList: true, subtree: true } );
+	const target = getObserverTarget();
+	if ( target ) {
+		domObserver.observe( target, { childList: true, subtree: true } );
+	}
 	autoClickEditPattern();
 }

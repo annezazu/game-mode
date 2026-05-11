@@ -47,11 +47,16 @@ function walkClientIds( editor, clientIds, visit ) {
 	} );
 }
 
+function needsStructuralLock( currentLock ) {
+	return ! currentLock || currentLock.remove !== true || currentLock.move !== true;
+}
+
 function applyLocks() {
 	const editor = select( blockEditorStore );
 	if ( ! editor ) {
 		return;
 	}
+	const blockEditor = dispatch( blockEditorStore );
 	const rootIds = editor.getBlockOrder();
 	walkClientIds( editor, rootIds, ( clientId ) => {
 		const block = editor.getBlock( clientId );
@@ -59,13 +64,47 @@ function applyLocks() {
 			return;
 		}
 		const mode = editor.getBlockEditingMode?.( clientId );
-		if ( mode === 'contentOnly' ) {
+		if ( mode !== 'contentOnly' ) {
+			blockEditor.setBlockEditingMode?.( clientId, 'contentOnly' );
+		}
+		// contentOnly mode locks the wrapper's *children* but not the wrapper
+		// itself — without these, the pattern can still be deleted/moved by
+		// the parent. Mirrors the old PHP `templateLock="contentOnly"` Group
+		// wrapper that this filter replaced.
+		const currentLock = block.attributes?.lock;
+		if ( needsStructuralLock( currentLock ) ) {
+			blockEditor.__unstableMarkNextChangeAsNotPersistent?.();
+			blockEditor.updateBlockAttributes( clientId, {
+				lock: { ...( currentLock || {} ), remove: true, move: true },
+			} );
+		}
+	} );
+}
+
+function clearLocks() {
+	const editor = select( blockEditorStore );
+	if ( ! editor ) {
+		return;
+	}
+	const blockEditor = dispatch( blockEditorStore );
+	const rootIds = editor.getBlockOrder();
+	walkClientIds( editor, rootIds, ( clientId ) => {
+		const block = editor.getBlock( clientId );
+		if ( ! block || ! isFromPattern( block ) ) {
 			return;
 		}
-		dispatch( blockEditorStore ).setBlockEditingMode?.(
-			clientId,
-			'contentOnly'
-		);
+		const currentLock = block.attributes?.lock;
+		if ( ! currentLock ) {
+			return;
+		}
+		const { remove: _r, move: _m, ...rest } = currentLock;
+		// Nothing of ours to strip.
+		if ( _r === undefined && _m === undefined ) {
+			return;
+		}
+		const nextLock = Object.keys( rest ).length ? rest : undefined;
+		blockEditor.__unstableMarkNextChangeAsNotPersistent?.();
+		blockEditor.updateBlockAttributes( clientId, { lock: nextLock } );
 	} );
 }
 
@@ -75,6 +114,9 @@ export function setupPatternContentOnly( level ) {
 		unsubscribe = null;
 	}
 	if ( level !== 'easy' && level !== 'medium' ) {
+		// Strip the structural locks we applied for previous levels — the
+		// editing mode is cleared by hard-no-content-only when needed.
+		clearLocks();
 		return;
 	}
 	unsubscribe = subscribe( applyLocks, blockEditorStore );

@@ -28,5 +28,9 @@
     "@wordpress/plugins": "^7.45.0",
     "@wordpress/preferences": "^4.45.0",
     "@wordpress/scripts": "^30.0.0"
+  },
+  "dependencies": {
+    "kilimjs": "^0.2.1",
+    "motion": "^12.38.0"
   }
 }
