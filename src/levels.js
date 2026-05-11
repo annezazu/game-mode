@@ -4,7 +4,18 @@
  * Each level provides:
  * - meta: label, description, icon, accent color
  * - allowThemeBlocks: false → hide theme/site/post/query/template-part blocks from inserter
- * - blockSupports: 'minimal' | 'default' | 'expanded'
+ * - blockSupports: 'minimal' | 'default' | 'expanded'. Simple strips block
+ *   supports at registration time so unwanted controls don't appear in the
+ *   ToolsPanel "more" menu (theme.json `settings.*` only gates *default*
+ *   visibility — the more menu shows everything the block declares).
+ *   Advanced pre-populates `__experimentalDefaultControls` so every control
+ *   renders up-front. Intermediate is a no-op.
+ *
+ * Additionally, PHP `wp_theme_json_data_user` filter expresses Simple's
+ * curation declaratively at the theme.json layer (see `game-mode.php`).
+ * That's belt-and-braces on top of the registration-time strip — it
+ * disables the underlying settings even when the more menu would surface
+ * a control.
  * - prefs: object of core/preferences values to apply for this level
  *   (keys are core preference names; values are booleans).
  *   Includes the bundled PR #74546 keys (showSimpleTopbar, showBlockHelpers).

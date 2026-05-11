@@ -319,27 +319,15 @@ body[data-game-mode="easy"] {
 	// (The block-inspector tablist is hidden by the JS observer in
 	// easy-block-inspector.js after the Styles tab has been activated.)
 
-	// Hide block-level Layout / Dimensions / Border / Position panels.
-	// Targeted by panel header label via :has() — works in modern browsers
-	// (Chrome 105+, Safari 15.4+, Firefox 121+ which covers WP-supported set).
-	.block-editor-block-inspector .components-tools-panel,
-	.block-editor-block-inspector .components-panel__body {
-		&:has(> .components-tools-panel-header [aria-label="Layout"]),
-		&:has(> .components-tools-panel-header [aria-label*="Layout"]),
-		&:has(> h2 button[aria-label="Layout"]),
-		&:has(> h2 button[aria-label*="Layout"]),
-		&:has(> .components-tools-panel-header [aria-label="Dimensions"]),
-		&:has(> h2 button[aria-label="Dimensions"]),
-		&:has(> .components-tools-panel-header [aria-label="Border"]),
-		&:has(> h2 button[aria-label="Border"]),
-		&:has(> .components-tools-panel-header [aria-label="Position"]),
-		&:has(> h2 button[aria-label="Position"]),
-		&:has(> .components-tools-panel-header [aria-label="Shadow"]),
-		&:has(> h2 button[aria-label="Shadow"]),
-		&:has(> .components-tools-panel-header [aria-label="Background"]),
-		&:has(> h2 button[aria-label="Background"]) {
-			display: none !important;
-		}
+	// Hide ToolsPanels that have no items. With Simple's theme.json
+	// constraints (see `game_mode_filter_theme_json_data_user` in
+	// `game-mode.php`) the individual controls inside Dimensions / Border /
+	// Shadow / Position / Background panels are disabled, leaving the
+	// panel header rendering over an empty body. Catch those panels by
+	// "no items" rather than aria-label / text content — robust against
+	// label renames and locale changes.
+	.block-editor-block-inspector .components-tools-panel:not(:has(.components-tools-panel-item)) {
+		display: none !important;
 	}
 
 	// Hide the layout-only sub-controls some blocks render outside the

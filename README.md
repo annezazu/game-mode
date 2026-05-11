@@ -68,7 +68,7 @@ Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expan
 
 ## Architecture
 
-- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, registered user meta (`game_mode_level`) exposed through the canonical `/wp/v2/users/me` endpoint, and an `allowed_block_types_all` filter that hides theme blocks from the inserter when the user is on Simple level (the single source of truth for the theme-block list). Pattern content-only locking is now handled by WP 7.0 Core; the Advanced opt-out is set via `disableContentOnlyForUnsyncedPatterns` in `block_editor_settings_all`.
+- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, registered user meta (`game_mode_level`) exposed through `/wp/v2/users/me`, and three server-side curation layers — `allowed_block_types_all` for theme-block hiding on Simple, `block_editor_settings_all` for per-level editor settings (`codeEditingEnabled`, `disableContentOnlyForUnsyncedPatterns`), and `wp_theme_json_data_user` for Simple's declarative settings constraints (appearance-tools off, advanced typography keys off, etc.). The theme.json layer is belt-and-braces on top of `minimizeSupports` — settings can't gate the ToolsPanel "more" menu, only the default-visible set.
 - **JS bundle** (`src/`): React UI for the picker modal + bottom-right switcher (`@wordpress/components`), level configuration (`levels.js`), and a stack of `MutationObserver`/`subscribe()`-driven filters in `src/filters/` that hide-or-modify parts of the editor based on the active level.
 
 ## Stability — experimental Gutenberg APIs in use
