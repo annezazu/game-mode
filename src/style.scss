@@ -116,7 +116,10 @@ $switcher-z: 100000;
 
 	&__summary {
 		position: relative;
-		min-height: 180px;
+		// Sized for the tallest level (Intermediate / Advanced) so the
+		// modal doesn't visibly shrink when Simple — which has shorter
+		// description + bullet copy — is selected.
+		min-height: 380px;
 		padding: 20px 22px;
 		border-radius: 12px;
 		background: #fff;
