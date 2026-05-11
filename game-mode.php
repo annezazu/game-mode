@@ -63,37 +63,6 @@ function game_mode_enqueue_assets() {
 add_action( 'enqueue_block_editor_assets', 'game_mode_enqueue_assets' );
 
 /**
- * Wrap registered patterns in a contentOnly Group block. Easy + Medium modes
- * read a per-user preference and apply this server-side so the lock travels
- * with every pattern insertion.
- *
- * The actual gating per level is performed client-side; we always provide a
- * "locked variant" of the pattern content under a known marker, and the JS
- * filter chooses which to insert. To keep parsing fast, we only wrap at
- * registration time when a user-meta flag is set.
- */
-function game_mode_filter_pattern_args( $pattern_properties, $pattern_name ) {
-	$user_id = get_current_user_id();
-	if ( ! $user_id ) {
-		return $pattern_properties;
-	}
-	$level = get_user_meta( $user_id, 'game_mode_level', true );
-	if ( 'easy' !== $level && 'medium' !== $level ) {
-		return $pattern_properties;
-	}
-	if ( empty( $pattern_properties['content'] ) ) {
-		return $pattern_properties;
-	}
-	$wrapped =
-		'<!-- wp:group {"templateLock":"contentOnly","layout":{"type":"constrained"}} -->' .
-		'<div class="wp-block-group">' . $pattern_properties['content'] . '</div>' .
-		'<!-- /wp:group -->';
-	$pattern_properties['content'] = $wrapped;
-	return $pattern_properties;
-}
-add_filter( 'register_block_pattern_args', 'game_mode_filter_pattern_args', 10, 2 );
-
-/**
  * Register `game_mode_level` as a per-user meta exposed to the REST API.
  *
  * This replaces a previous custom `game-mode/v1/level` REST endpoint. By
