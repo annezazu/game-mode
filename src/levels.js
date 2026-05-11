@@ -65,9 +65,9 @@ export const LEVELS = {
 		accent: '#3b82f6',
 		changes: [
 			__( 'Add, remove, and rearrange any block on the page', 'game-mode' ),
-			__( 'Use every block, including theme blocks like Query Loop and Post Title', 'game-mode' ),
+			__( 'Use every block, including theme blocks', 'game-mode' ),
 			__( 'Fine-tune styling with the full set of standard controls', 'game-mode' ),
-			__( 'Patterns open to content edits by default — unlock the layout anytime', 'game-mode' ),
+			__( 'Drop in patterns and edit their content', 'game-mode' ),
 		],
 		patternsContentOnly: true,
 		allowThemeBlocks: true,
@@ -101,9 +101,9 @@ export const LEVELS = {
 		icon: shield,
 		accent: '#ef4444',
 		changes: [
-			__( 'Fine-tune layout, spacing, color, and typography on every block', 'game-mode' ),
+			__( 'Fine-tune layout, spacing, color, and typography.', 'game-mode' ),
 			__( 'Edit every part of any pattern, fully unlocked by default', 'game-mode' ),
-			__( 'Reach every styling control without digging through menus', 'game-mode' ),
+			__( 'Reach every control without digging through menus.', 'game-mode' ),
 			__( 'Install new blocks from the block directory', 'game-mode' ),
 		],
 		patternsContentOnly: false,
