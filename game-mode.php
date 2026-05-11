@@ -209,9 +209,6 @@ function game_mode_editor_settings_for_level( $level ) {
 		'easy'   => array(
 			// Simple users edit content, not markup — hide the Code Editor.
 			'codeEditingEnabled' => false,
-			// Hide the block lock UI in the inspector. Programmatic locking
-			// from `src/filters/easy-lock-remove.js` still works.
-			'canLockBlocks'      => false,
 		),
 		'medium' => array(
 			// Intermediate users compose pages, but rarely need raw block markup.

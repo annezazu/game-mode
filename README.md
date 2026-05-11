@@ -19,7 +19,6 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 | Choose-pattern modal on new pages (`enableChoosePatternModal`) | enabled | enabled | disabled |
 | Block-directory installs | disabled | disabled | enabled |
 | Code Editor (`codeEditingEnabled`) | disabled | disabled | enabled |
-| Block lock UI (`canLockBlocks`) | disabled | enabled | enabled |
 | Styles sidebar | Browse styles + Colors + Typography + Background only | full | full |
 | Pattern editing UX | locked unless "Edit pattern" clicked | locked unless "Edit pattern" clicked | auto-unlocked |
 | Lock-removal on root blocks | locked (Backspace can't wipe a section) | unlocked | unlocked |
