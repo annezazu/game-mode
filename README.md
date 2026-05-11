@@ -63,11 +63,11 @@ The bundled `.wp-env.json` pins WordPress to a recent release and mounts this di
 npm test
 ```
 
-Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expandDefaultControls`) and the theme-block matcher.
+Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expandDefaultControls`).
 
 ## Architecture
 
-- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, registered user meta (`game_mode_level`) exposed through the canonical `/wp/v2/users/me` endpoint, and an `allowed_block_types_all` filter that hides theme blocks from the inserter when the user is on Simple level. Pattern content-only locking is now done at runtime in JS (`src/filters/pattern-content-only.js`) — no more server-side mutation of registered pattern content.
+- **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, registered user meta (`game_mode_level`) exposed through the canonical `/wp/v2/users/me` endpoint, and an `allowed_block_types_all` filter that hides theme blocks from the inserter when the user is on Simple level (the single source of truth for the theme-block list). Pattern content-only locking is now handled by WP 7.0 Core; the Advanced opt-out is set via `disableContentOnlyForUnsyncedPatterns` in `block_editor_settings_all`.
 - **JS bundle** (`src/`): React UI for the picker modal + bottom-right switcher (`@wordpress/components`), level configuration (`levels.js`), and a stack of `MutationObserver`/`subscribe()`-driven filters in `src/filters/` that hide-or-modify parts of the editor based on the active level.
 
 ## Stability — experimental Gutenberg APIs in use
