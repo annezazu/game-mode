@@ -1,31 +1,29 @@
 /**
- * Simple + Intermediate: lock inserted patterns to content-only editing.
+ * Simple + Intermediate: mark inserted patterns' inner structure as
+ * content-only, leaving the pattern wrapper itself fully editable.
  *
- * This is the runtime counterpart to `hard-no-content-only.js`. Where Advanced
- * walks the canvas and *clears* `contentOnly` editing mode, Simple and
- * Intermediate walk the canvas and *set* it for any block that came from a
- * pattern (carries `attributes.metadata.patternName`).
+ * Runtime counterpart to `hard-no-content-only.js`. Walks the canvas and
+ * sets `contentOnly` editing mode on any block carrying
+ * `attributes.metadata.patternName` — the marker WP 7.0+ stamps on
+ * pattern-derived blocks. The mode cascades to descendants, so the inner
+ * structure of the pattern is locked (no add/remove/reorder of inner
+ * blocks) while text, images, and other content remain editable.
  *
- * Mechanism: `setBlockEditingMode( clientId, 'contentOnly' )` on the
- * `core/block-editor` store. Same API the rest of the plugin uses, no
- * server-side mutation of registered pattern content.
+ * The wrapper itself stays deletable in all levels. We deliberately do
+ * not try to enforce wrapper-non-deletion because there's no clean way
+ * to do that in WP 7.0+:
  *
- * Replaces a previous `register_block_pattern_args` PHP filter that wrapped
- * every registered pattern's `content` in a `templateLock="contentOnly"`
- * Group block. That had three problems the runtime approach avoids:
+ *   - Setting `attributes.lock.remove` persists into saved markup and
+ *     leaks forward when the user later switches to Advanced.
+ *   - Setting the editing mode to `'disabled'` is mirrored into
+ *     `attributes.lock.remove` by Gutenberg's reducer, so it persists
+ *     just the same.
+ *   - There is no `canRemoveBlock` filter at the data layer.
  *
- *   1. It mutated stored pattern content — patterns saved back to a child
- *      theme inherited the wrapper.
- *   2. It missed patterns registered via `theme.json` or the `wp_block`
- *      post type.
- *   3. The wrapper Group itself counted as a real block, so the pattern's
- *      original layout (e.g. constrained → wide) was overridden.
- *
- * On WP 7.0+ core itself already applies `contentOnly` editing mode to
- * pattern-inserted blocks. This filter is idempotent in that case — calling
- * `setBlockEditingMode('contentOnly')` on a block that's already content-only
- * is a no-op. On WP < 7.0 (where the new pattern editing UX hadn't landed),
- * this filter provides the lock that the PHP wrapper used to.
+ * The level's other guardrails (limited inserter, simplified UI,
+ * `contentOnly` cascade on the pattern's inner structure) carry the
+ * "won't accidentally break the layout" intent. Wrapper deletion is
+ * accepted as part of the WP 7.0 pattern UX.
  */
 
 import { select, dispatch, subscribe } from '@wordpress/data';
@@ -47,10 +45,6 @@ function walkClientIds( editor, clientIds, visit ) {
 	} );
 }
 
-function needsStructuralLock( currentLock ) {
-	return ! currentLock || currentLock.remove !== true || currentLock.move !== true;
-}
-
 function applyLocks() {
 	const editor = select( blockEditorStore );
 	if ( ! editor ) {
@@ -63,48 +57,9 @@ function applyLocks() {
 		if ( ! block || ! isFromPattern( block ) ) {
 			return;
 		}
-		const mode = editor.getBlockEditingMode?.( clientId );
-		if ( mode !== 'contentOnly' ) {
+		if ( editor.getBlockEditingMode?.( clientId ) !== 'contentOnly' ) {
 			blockEditor.setBlockEditingMode?.( clientId, 'contentOnly' );
 		}
-		// contentOnly mode locks the wrapper's *children* but not the wrapper
-		// itself — without these, the pattern can still be deleted/moved by
-		// the parent. Mirrors the old PHP `templateLock="contentOnly"` Group
-		// wrapper that this filter replaced.
-		const currentLock = block.attributes?.lock;
-		if ( needsStructuralLock( currentLock ) ) {
-			blockEditor.__unstableMarkNextChangeAsNotPersistent?.();
-			blockEditor.updateBlockAttributes( clientId, {
-				lock: { ...( currentLock || {} ), remove: true, move: true },
-			} );
-		}
-	} );
-}
-
-function clearLocks() {
-	const editor = select( blockEditorStore );
-	if ( ! editor ) {
-		return;
-	}
-	const blockEditor = dispatch( blockEditorStore );
-	const rootIds = editor.getBlockOrder();
-	walkClientIds( editor, rootIds, ( clientId ) => {
-		const block = editor.getBlock( clientId );
-		if ( ! block || ! isFromPattern( block ) ) {
-			return;
-		}
-		const currentLock = block.attributes?.lock;
-		if ( ! currentLock ) {
-			return;
-		}
-		const { remove: _r, move: _m, ...rest } = currentLock;
-		// Nothing of ours to strip.
-		if ( _r === undefined && _m === undefined ) {
-			return;
-		}
-		const nextLock = Object.keys( rest ).length ? rest : undefined;
-		blockEditor.__unstableMarkNextChangeAsNotPersistent?.();
-		blockEditor.updateBlockAttributes( clientId, { lock: nextLock } );
 	} );
 }
 
@@ -114,9 +69,6 @@ export function setupPatternContentOnly( level ) {
 		unsubscribe = null;
 	}
 	if ( level !== 'easy' && level !== 'medium' ) {
-		// Strip the structural locks we applied for previous levels — the
-		// editing mode is cleared by hard-no-content-only when needed.
-		clearLocks();
 		return;
 	}
 	unsubscribe = subscribe( applyLocks, blockEditorStore );
