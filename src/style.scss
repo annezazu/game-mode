@@ -296,6 +296,17 @@ body[data-game-mode="easy"] {
 		display: none !important;
 	}
 
+	// Hide the "Browse all" escape hatch in the canvas quick inserter.
+	// Without this, the quick inserter's footer link opens the full inserter
+	// sidebar, where the curated tab restrictions still apply but the visible
+	// "browse everything" affordance contradicts the constrained mental model
+	// Simple is supposed to give. Hiding the link doesn't remove access — the
+	// sidebar inserter (+ toggle in the toolbar) is still reachable when the
+	// user actually wants it.
+	.block-editor-inserter__quick-inserter-expand {
+		display: none !important;
+	}
+
 	// The inserter tablist is hidden by the JS observer (after the Patterns
 	// tab has been activated) so we don't break the sidebar's slide-in
 	// animation by mutating layout-affecting CSS on the tablist element.
