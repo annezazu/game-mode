@@ -39,6 +39,7 @@ import { setupEasyBlockInspector } from './filters/easy-block-inspector';
 import { setupBlockDirectoryControl } from './filters/block-directory';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
 import { setupAutoListView } from './filters/auto-list-view';
+import { setupEasyToolbarCuration } from './filters/easy-toolbar-curation';
 import {
 	installBeforeUnloadSwallow,
 	armBeforeUnloadSwallow,
@@ -115,6 +116,7 @@ function applyLevelEffects( level ) {
 	setupEasyBlockInspector( level );
 	setupBlockDirectoryControl( level );
 	setupAutoListView( level );
+	setupEasyToolbarCuration( level );
 	setupEasyLockRemove( level );
 }
 
