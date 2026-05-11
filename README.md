@@ -81,7 +81,6 @@ This plugin reaches into a number of `__experimental*` and `__unstable*` APIs fr
 | `__unstableMotion` / `__unstableAnimatePresence` (`@wordpress/components`) | `src/components/LevelSwitcher.jsx` | Switcher icon swap goes from animated → instant |
 | `__unstableMarkNextChangeAsNotPersistent` (`core/block-editor` dispatch) | `src/filters/easy-lock-remove.js` | Lock-remove writes get marked as user edits, dirtying the post |
 | `__experimentalGetAllowedPatterns` (`core/block-editor` selector) | n/a directly today, but used by patterns observer | Pattern list filtering can no-op |
-| `setBlockEditingMode` / `getBlockEditingMode` / `unsetBlockEditingMode` | `src/filters/hard-no-content-only.js` | Pattern auto-unlock in Advanced stops working |
 | `__experimentalText` / `__experimentalHeading` / `__experimentalVStack` / `__experimentalHStack` (`@wordpress/components`) | `LevelCard`, `LevelPickerModal` | Build error — these are not optional, swap with stable `Text`/`Heading`/`Flex` if removed |
 
 In addition, several filters depend on **DOM-text matching against editor labels** (e.g. matching panel headers by their visible "Layout" / "Edit pattern" text). Those break in non-English locales and on label changes:
