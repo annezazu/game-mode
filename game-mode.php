@@ -354,17 +354,18 @@ function game_mode_theme_json_overrides_for_level( $level ) {
 }
 
 /**
- * Apply per-level theme.json overrides via `wp_theme_json_data_default`.
+ * Apply per-level theme.json overrides via `wp_theme_json_data_user`.
  *
- * The default-layer filter runs before theme + user data are merged in,
- * so theme.json files can still extend or override (the user is free to
- * override anything we constrain). This makes Simple's curation
- * declarative without mutating block registration.
+ * Hook the USER layer (highest priority in the default → blocks → theme →
+ * user merge order) so our constraints win over the theme's theme.json.
+ * Conceptually right too: game-mode constraints are per-user (driven by
+ * the user's level meta), so layering them as user-level data lines up
+ * with how Core thinks about the merge stack.
  *
- * @param WP_Theme_JSON_Data $theme_json Default theme.json data.
+ * @param WP_Theme_JSON_Data $theme_json User theme.json data.
  * @return WP_Theme_JSON_Data
  */
-function game_mode_filter_theme_json_data_default( $theme_json ) {
+function game_mode_filter_theme_json_data_user( $theme_json ) {
 	$user_id = get_current_user_id();
 	if ( ! $user_id ) {
 		return $theme_json;
@@ -382,4 +383,4 @@ function game_mode_filter_theme_json_data_default( $theme_json ) {
 	);
 	return $theme_json;
 }
-add_filter( 'wp_theme_json_data_default', 'game_mode_filter_theme_json_data_default' );
+add_filter( 'wp_theme_json_data_user', 'game_mode_filter_theme_json_data_user' );
