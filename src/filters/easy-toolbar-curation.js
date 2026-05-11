@@ -2,10 +2,10 @@
  * Simple mode: trim niche / escape-hatch formats from the RichText toolbar.
  *
  * The default RichText toolbar carries inline-image, keyboard, language,
- * subscript, and superscript — useful for technical or scientific content
- * but distracting for Simple's "quick edits" persona. Drop them so the
- * toolbar stays focused on bold / italic / link / strike / underline /
- * inline-code / text-color.
+ * subscript, superscript, math, and footnote — useful for technical,
+ * scientific, or academic content but distracting for Simple's "quick
+ * edits" persona. Drop them so the toolbar stays focused on bold /
+ * italic / link / underline / strike / inline-code / text-color.
  *
  * Uses the documented `wp.richText.unregisterFormatType` API
  * (Curating the Editor Experience → Disable editor functionality).
@@ -16,8 +16,10 @@
  * are re-registered from `@wordpress/format-library` on the fresh load.
  */
 
-import { unregisterFormatType, getFormatType } from '@wordpress/rich-text';
-import { subscribe } from '@wordpress/data';
+import { unregisterFormatType } from '@wordpress/rich-text';
+import { select, subscribe } from '@wordpress/data';
+
+const RICH_TEXT_STORE = 'core/rich-text';
 
 const FORMATS_TO_DROP = [
 	'core/image',
@@ -25,30 +27,33 @@ const FORMATS_TO_DROP = [
 	'core/language',
 	'core/subscript',
 	'core/superscript',
+	'core/math',
+	'core/footnote',
 ];
 
 let unsubscribe = null;
 
 /**
- * Try to unregister every format in FORMATS_TO_DROP.
- * Returns the count of formats still pending registration.
+ * Try to unregister every format in FORMATS_TO_DROP that is currently
+ * registered. Returns the count still pending registration.
  *
- * Defensive against throws: rich-text store may not be mounted yet at the
- * point this runs, and `getFormatType` can return undefined / throw if the
- * registry isn't initialized.
+ * Queries the `core/rich-text` store directly (the top-level
+ * `@wordpress/rich-text` package doesn't export `getFormatType` — only the
+ * store does).
  */
 function tryUnregisterAll() {
 	let pending = 0;
+	let registry;
+	try {
+		registry = select( RICH_TEXT_STORE );
+	} catch ( _e ) {
+		return FORMATS_TO_DROP.length;
+	}
+	if ( ! registry || typeof registry.getFormatType !== 'function' ) {
+		return FORMATS_TO_DROP.length;
+	}
 	FORMATS_TO_DROP.forEach( ( name ) => {
-		let registered = null;
-		try {
-			registered = getFormatType( name );
-		} catch ( _e ) {
-			// Registry not ready.
-			pending += 1;
-			return;
-		}
-		if ( ! registered ) {
+		if ( ! registry.getFormatType( name ) ) {
 			pending += 1;
 			return;
 		}
