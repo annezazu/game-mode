@@ -212,9 +212,22 @@ function game_mode_editor_settings_for_level( $level ) {
 		),
 		'medium' => array(
 			// Intermediate users compose pages, but rarely need raw block markup.
-			'codeEditingEnabled' => false,
+			'codeEditingEnabled'                    => false,
+			// Match Advanced: don't lock template parts / unsynced patterns
+			// into contentOnly mode just because they're at the root.
+			'disableContentOnlyForUnsyncedPatterns' => true,
 		),
-		'hard'   => null,
+		'hard'   => array(
+			// Opt out of WP 7.0's contentOnly default for unsynced patterns
+			// and template parts. Must be set server-side: Core applies the
+			// default at block-editor mount, so any client-side opt-out via
+			// `updateSettings` loses the race on a fresh load. (The previous
+			// client-side `src/filters/hard-no-content-only.js` could only
+			// react after the editor had already rendered with contentOnly
+			// applied — the locks flashed off then back on as patterns
+			// remounted. Server-side is the only race-free option.)
+			'disableContentOnlyForUnsyncedPatterns' => true,
+		),
 	);
 	return isset( $by_level[ $level ] ) ? $by_level[ $level ] : null;
 }

@@ -10,7 +10,7 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 
 | | Simple | Intermediate | Advanced |
 |---|---|---|---|
-| Patterns | content-only locked | content-only locked | unlocked |
+| Patterns | content-only locked | unlocked | unlocked |
 | Block-support controls | color + font size only | core defaults | every control expanded by default |
 | Focus mode (`focusMode` core preference) | on | off | off |
 | Distraction-free | minimal chrome (helpers off) | normal | normal |
@@ -20,7 +20,7 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 | Block-directory installs | disabled | disabled | enabled |
 | Code Editor (`codeEditingEnabled`) | disabled | disabled | enabled |
 | Styles sidebar | Browse styles + Colors + Typography + Background only | full | full |
-| Pattern editing UX | locked unless "Edit pattern" clicked | locked unless "Edit pattern" clicked | auto-unlocked |
+| Pattern editing UX | locked unless "Edit pattern" clicked | auto-unlocked | auto-unlocked |
 | Lock-removal on root blocks | locked (Backspace can't wipe a section) | unlocked | unlocked |
 
 ## Install
@@ -82,14 +82,12 @@ This plugin reaches into a number of `__experimental*` and `__unstable*` APIs fr
 | `__unstableMotion` / `__unstableAnimatePresence` (`@wordpress/components`) | `src/components/LevelSwitcher.jsx` | Switcher icon swap goes from animated → instant |
 | `__unstableMarkNextChangeAsNotPersistent` (`core/block-editor` dispatch) | `src/filters/easy-lock-remove.js` | Lock-remove writes get marked as user edits, dirtying the post |
 | `__experimentalGetAllowedPatterns` (`core/block-editor` selector) | n/a directly today, but used by patterns observer | Pattern list filtering can no-op |
-| `setBlockEditingMode` / `getBlockEditingMode` / `unsetBlockEditingMode` | `src/filters/hard-no-content-only.js` | Pattern auto-unlock in Advanced stops working |
 | `__experimentalText` / `__experimentalHeading` / `__experimentalVStack` / `__experimentalHStack` (`@wordpress/components`) | `LevelCard`, `LevelPickerModal` | Build error — these are not optional, swap with stable `Text`/`Heading`/`Flex` if removed |
 
 In addition, several filters depend on **DOM-text matching against editor labels** (e.g. matching panel headers by their visible "Layout" / "Edit pattern" text). Those break in non-English locales and on label changes:
 
 - `src/filters/easy-block-inspector.js` — "Edit pattern", "Styles", "Layout", "Dimensions", "Border", "Position", "Shadow", "Background", "Advanced"
 - `src/filters/easy-styles-menu.js` — "Browse styles", "Colors", "Typography", "Background", + the "customize the appearance of specific blocks" description
-- `src/filters/hard-no-content-only.js` — "Edit pattern"
 - `src/filters/easy-patterns-only-inserter.js` — "Patterns"
 
 Also worth noting: `showSimpleTopbar` and `showBlockHelpers` in `src/levels.js` mirror an unmerged Gutenberg PR ([#74546](https://github.com/WordPress/gutenberg/pull/74546)). On stock WordPress they are no-ops; the visual effect is provided by the CSS in `src/filters/distraction-free-config.js`.
