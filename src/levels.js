@@ -40,7 +40,7 @@ export const LEVELS = {
 			// minimal feel via the granular helpers (PR #74546) + scoped CSS.
 			distractionFree: false,
 			fixedToolbar: false,
-			showListView: false,
+			showListView: true,
 			showBlockBreadcrumbs: false,
 			showIconLabels: false,
 			showSimpleTopbar: true,

@@ -1,5 +1,9 @@
 /**
- * Advanced mode: open the document list view by default.
+ * Open the document list view by default for levels that benefit from it.
+ *
+ * - Simple: list view doubles as a structure overview for users who are
+ *   just editing content within an existing layout.
+ * - Advanced: designers expect every tool open and reachable.
  *
  * `showListView` (in the level's `prefs`) governs the *preference* — it
  * decides whether the toggle is visible / on by default. To actually open
@@ -19,6 +23,8 @@ const STORES_WITH_LIST_VIEW = [
 	'core/edit-site',
 	'core/edit-post',
 ];
+
+const LEVELS_WITH_AUTO_LIST_VIEW = [ 'easy', 'hard' ];
 
 let opened = false;
 
@@ -40,9 +46,9 @@ function openListView() {
 	}
 }
 
-export function setupAdvancedListView( level ) {
+export function setupAutoListView( level ) {
 	opened = false;
-	if ( level !== 'hard' ) {
+	if ( ! LEVELS_WITH_AUTO_LIST_VIEW.includes( level ) ) {
 		return;
 	}
 	openListView();
