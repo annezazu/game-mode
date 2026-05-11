@@ -286,12 +286,12 @@ $switcher-z: 100000;
 }
 
 // Simple mode: keep the inserter button accessible (so users can browse
-// patterns) but suppress the other topbar affordances and hide the
-// non-Patterns tabs in the inserter sidebar. JS observer in
-// easy-patterns-only-inserter.js auto-selects the Patterns tab.
+// patterns) and the List View toggle visible (List View opens by default
+// here and users may want to dismiss/reopen it). Suppress the remaining
+// topbar affordances and hide the non-Patterns tabs in the inserter
+// sidebar. JS observer in easy-patterns-only-inserter.js auto-selects
+// the Patterns tab.
 body[data-game-mode="easy"] {
-	.edit-site-header-edit-mode__list-view-toggle,
-	.editor-document-tools__document-overview-toggle,
 	.editor-zoom-out-toggle {
 		display: none !important;
 	}
