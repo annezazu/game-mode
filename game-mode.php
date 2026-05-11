@@ -271,3 +271,115 @@ function game_mode_filter_block_editor_settings( $settings ) {
 	return $settings;
 }
 add_filter( 'block_editor_settings_all', 'game_mode_filter_block_editor_settings' );
+
+/**
+ * Per-level theme.json data overrides applied through
+ * `wp_theme_json_data_default`.
+ *
+ * Theme.json `settings` keys gate which block-support controls render in
+ * the inspector — even when a block declares the support, the panel only
+ * renders if the matching setting is enabled. So expressing Simple's
+ * "color + font-size only" curation at the theme.json layer is both more
+ * declarative and more aligned with how themes themselves work, vs.
+ * mutating block registration after the fact.
+ *
+ * Reference: the Curating the Editor Experience guide's theme.json page —
+ * https://developer.wordpress.org/block-editor/how-to-guides/curating-the-editor-experience/theme-json/
+ *
+ * Returns `null` for a level → no overrides, leave the theme's theme.json
+ * untouched.
+ */
+function game_mode_theme_json_overrides_for_level( $level ) {
+	if ( 'easy' === $level ) {
+		// Disable the appearance-tools bundle (border / dimensions / position
+		// / shadow / padding / margin / blockGap / lineHeight / letterSpacing
+		// / textDecoration / textTransform). Then explicitly turn off the
+		// typography knobs that aren't gated by appearanceTools.
+		return array(
+			'appearanceTools' => false,
+			'typography'      => array(
+				'fontFamily'      => false,
+				'fontStyle'       => false,
+				'fontWeight'      => false,
+				'dropCap'         => false,
+				'textColumns'     => false,
+				'writingMode'     => false,
+				// Explicit no-ops on appearance-tools-gated keys, defense
+				// against themes that re-enable them piecemeal.
+				'lineHeight'      => false,
+				'letterSpacing'   => false,
+				'textDecoration'  => false,
+				'textTransform'   => false,
+			),
+			'color'           => array(
+				// Keep palette + text + background (Simple still allows color).
+				// Disable advanced color UI knobs.
+				'custom'         => false,
+				'customDuotone'  => false,
+				'customGradient' => false,
+				'duotone'        => array(),
+				'link'           => false,
+				'button'         => false,
+				'heading'        => false,
+				'caption'        => false,
+			),
+			'border'          => array(
+				'color'  => false,
+				'radius' => false,
+				'style'  => false,
+				'width'  => false,
+			),
+			'shadow'          => array(
+				'defaultPresets' => false,
+			),
+			'position'        => array(
+				'sticky' => false,
+			),
+			'dimensions'      => array(
+				'aspectRatio' => false,
+				'minHeight'   => false,
+			),
+			'background'      => array(
+				'backgroundImage' => false,
+				'backgroundSize'  => false,
+			),
+			'spacing'         => array(
+				'padding'  => false,
+				'margin'   => false,
+				'blockGap' => false,
+			),
+		);
+	}
+	return null;
+}
+
+/**
+ * Apply per-level theme.json overrides via `wp_theme_json_data_default`.
+ *
+ * The default-layer filter runs before theme + user data are merged in,
+ * so theme.json files can still extend or override (the user is free to
+ * override anything we constrain). This makes Simple's curation
+ * declarative without mutating block registration.
+ *
+ * @param WP_Theme_JSON_Data $theme_json Default theme.json data.
+ * @return WP_Theme_JSON_Data
+ */
+function game_mode_filter_theme_json_data_default( $theme_json ) {
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return $theme_json;
+	}
+	$level = get_user_meta( $user_id, 'game_mode_level', true );
+	$settings_overrides = game_mode_theme_json_overrides_for_level( $level );
+	if ( ! is_array( $settings_overrides ) ) {
+		return $theme_json;
+	}
+	$theme_json->update_with(
+		array(
+			'version'  => 3,
+			'settings' => $settings_overrides,
+		)
+	);
+	return $theme_json;
+}
+add_filter( 'wp_theme_json_data_default', 'game_mode_filter_theme_json_data_default' );

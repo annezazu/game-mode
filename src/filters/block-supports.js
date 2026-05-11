@@ -1,17 +1,19 @@
 /**
- * Two block-support filters, switched on by the active level:
+ * Advanced mode: populate `__experimentalDefaultControls` for every support
+ * the block declares, so each control is visible by default in the
+ * ToolsPanel instead of hiding in the "more" menu.
  *
- * 1. `minimal` (Simple) — strip every block-support category from the inspector
- *    except color and typography.fontSize, then expand
- *    `__experimentalDefaultControls` on the survivors so every kept control
- *    (e.g. Link color) renders up-front rather than hiding in the
- *    ToolsPanel "more" menu.
+ * Simple mode's "color + font-size only" curation was previously done here
+ * via `minimizeSupports`, mutating block registration at boot. That moved
+ * to PHP `wp_theme_json_data_default` (see `game-mode.php`) — settings
+ * gate which inspector controls render, which is the layer themes
+ * themselves work at and the layer the Curating the Editor Experience
+ * guide recommends. The block-registration mutation went away with it.
  *
- * 2. `expanded` (Advanced) — port and extend Create Block Theme PR #824:
- *    populate `__experimentalDefaultControls` for every support the block
- *    declares, so each control is visible by default in the ToolsPanel.
+ * Intermediate mode is a no-op here (Core defaults).
  *
- * `default` (Intermediate) is a no-op.
+ * `__experimentalDefaultControls` has no theme.json equivalent — it's a
+ * per-block convention on `supports` — so the Advanced path stays in JS.
  */
 
 import { addFilter } from '@wordpress/hooks';
@@ -19,60 +21,6 @@ import { addFilter } from '@wordpress/hooks';
 import { LEVELS } from '../levels';
 
 const FILTER_NAMESPACE = 'game-mode/block-supports';
-
-/**
- * Strip every support except color + typography.fontSize.
- * Pure — exported for testing.
- */
-export function minimizeSupports( supports ) {
-	if ( ! supports || typeof supports !== 'object' ) {
-		return supports;
-	}
-	const next = {};
-	if ( supports.color ) {
-		next.color = supports.color;
-	}
-	if ( supports.typography ) {
-		const t = supports.typography;
-		const allowed = {};
-		if ( t.fontSize ) {
-			allowed.fontSize = t.fontSize;
-		}
-		if ( t.__experimentalFontSize ) {
-			allowed.__experimentalFontSize = t.__experimentalFontSize;
-		}
-		if ( Object.keys( allowed ).length ) {
-			next.typography = allowed;
-		}
-	}
-	// Always preserve infrastructure supports — these don't show as inspector
-	// controls but they govern how the block registers, parses, and lays out.
-	// Stripping `layout` / `align` causes Group/Header/Query blocks to render
-	// full-bleed instead of constrained to the theme's contentSize.
-	[
-		'anchor',
-		'className',
-		'customClassName',
-		'html',
-		'inserter',
-		'multiple',
-		'reusable',
-		'lock',
-		'align',
-		'alignWide',
-		'layout',
-		'__experimentalLayout',
-		'__experimentalSlashInserter',
-		'splitting',
-		'renaming',
-		'interactivity',
-	].forEach( ( key ) => {
-		if ( supports[ key ] !== undefined ) {
-			next[ key ] = supports[ key ];
-		}
-	} );
-	return next;
-}
 
 /**
  * Every known `__experimentalDefaultControls` key per support namespace.
@@ -159,13 +107,6 @@ export function registerBlockSupportsFilter( getLevel ) {
 			const config = LEVELS[ level ];
 			if ( ! config || ! settings.supports ) {
 				return settings;
-			}
-			if ( config.blockSupports === 'minimal' ) {
-				const minimized = minimizeSupports( settings.supports );
-				return {
-					...settings,
-					supports: { ...minimized, ...expandDefaultControls( minimized ) },
-				};
 			}
 			if ( config.blockSupports === 'expanded' ) {
 				return {
