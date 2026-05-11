@@ -42,6 +42,10 @@ import { setupHardNoContentOnly } from './filters/hard-no-content-only';
 import { setupPatternContentOnly } from './filters/pattern-content-only';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
 import { setupAdvancedListView } from './filters/advanced-list-view';
+import {
+	installBeforeUnloadSwallow,
+	armBeforeUnloadSwallow,
+} from './before-unload-swallow';
 import LevelPickerModal from './components/LevelPickerModal';
 import LevelSwitcher from './components/LevelSwitcher';
 
@@ -83,6 +87,14 @@ if ( cachedLevel ) {
 // Register registerBlockType filters once at module load.
 registerBlockSupportsFilter( getLevel );
 registerThemeBlocksInserterFilter( getLevel );
+
+// Install the beforeunload swallower at module load. Listeners on `window`
+// fire in registration order regardless of capture flag, so this has to win
+// the race against WP's `UnsavedChangesWarning` — see
+// ./before-unload-swallow.js for the full rationale.
+if ( typeof window !== 'undefined' ) {
+	installBeforeUnloadSwallow();
+}
 
 /**
  * Apply / re-apply all level-driven editor effects.
@@ -212,7 +224,29 @@ function GameModeUI() {
 					{ type: 'snackbar' }
 				);
 			}
-			setTimeout( () => window.location.reload(), wasFirstRun ? 0 : 400 );
+			setTimeout( () => {
+				// Drop any remaining dirty entity records (e.g. Discard
+				// path, where we never saved) so WP's editor doesn't
+				// consider the post dirty at reload time.
+				try {
+					const dirty =
+						select( coreStore ).__experimentalGetDirtyEntityRecords?.() ||
+						[];
+					dirty.forEach( ( { kind, name, key } ) => {
+						dispatch( coreStore ).discardEditedEntityRecord?.(
+							kind,
+							name,
+							key
+						);
+					} );
+				} catch ( _e ) {}
+				// Arm the module-load beforeunload listener so it
+				// swallows WP's handler before it can call
+				// `event.returnValue = …` (the only thing that triggers
+				// Chrome's native "Reload site?" dialog).
+				armBeforeUnloadSwallow();
+				window.location.reload();
+			}, wasFirstRun ? 0 : 400 );
 		},
 		[ setLevel ]
 	);
