@@ -1,5 +1,5 @@
 /**
- * Disable the @wordpress/block-directory plugin in Easy and Medium modes.
+ * Disable the @wordpress/block-directory plugin in Simple and Intermediate modes.
  *
  * `@wordpress/block-directory` registers itself as a plugin called
  * `'block-directory'`. Unregistering it prevents the "Available to install"

@@ -1,8 +1,8 @@
 /**
- * Easy mode: trim the Global Styles sidebar root menu to a curated allow-list.
+ * Simple mode: trim the Global Styles sidebar root menu to a curated allow-list.
  *
  * The Site Editor's Styles screen renders a list of navigator items
- * (Typography, Colors, Layout, Shadows, Blocks, Background, …). For Easy
+ * (Typography, Colors, Layout, Shadows, Blocks, Background, …). For Simple
  * mode we only want a small subset:
  *
  *   - Browse styles
@@ -16,6 +16,8 @@
  * resilient to internal class renames.
  */
 
+import { getObserverTarget } from './observer-target';
+
 const ALLOWED = [
 	'browse styles',
 	'colors',
@@ -24,7 +26,7 @@ const ALLOWED = [
 ];
 
 /**
- * Explicit block-list of root-menu rows we never want to show in Easy mode.
+ * Explicit block-list of root-menu rows we never want to show in Simple mode.
  * Belt-and-braces alongside the allow-list — newer Gutenberg builds keep
  * adding entries (Shadows, Layout, Blocks, …) and we'd rather hide a known
  * bad row by exact label than rely solely on allow-list misses.
@@ -265,7 +267,10 @@ export function setupEasyStylesMenu( level ) {
 	observer = new MutationObserver( () => {
 		processStylesScreen();
 	} );
-	observer.observe( document.body, { childList: true, subtree: true } );
+	const target = getObserverTarget();
+	if ( target ) {
+		observer.observe( target, { childList: true, subtree: true } );
+	}
 	// Run once in case the styles sidebar is already mounted.
 	processStylesScreen();
 }

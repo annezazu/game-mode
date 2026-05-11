@@ -50,7 +50,7 @@ describe( 'minimizeSupports', () => {
 	} );
 
 	it( 'composes with expandDefaultControls so Link color renders up-front', () => {
-		// Issue #14: Link was hiding in the ToolsPanel "more" menu in easy mode.
+		// Issue #14: Link was hiding in the ToolsPanel "more" menu in Simple mode.
 		const minimized = minimizeSupports( {
 			color: { background: true, text: true, link: true },
 		} );

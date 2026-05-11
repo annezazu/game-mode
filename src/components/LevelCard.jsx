@@ -53,6 +53,20 @@ export default function LevelCard( { level, isSelected, onSelect } ) {
 					<Text size={ 14 } id={ descId }>
 						{ level.tagline }
 					</Text>
+					{ Array.isArray( level.changes ) && level.changes.length > 0 && (
+						<ul className="game-mode-level-card__changes" aria-hidden="true">
+							{ level.changes.map( ( change, i ) => (
+								<li key={ i }>
+									<Icon
+										icon={ check }
+										size={ 16 }
+										className="game-mode-level-card__changes-check"
+									/>
+									<span>{ change }</span>
+								</li>
+							) ) }
+						</ul>
+					) }
 					<Text variant="muted" size={ 13 } aria-hidden="true">
 						{ level.description }
 					</Text>

@@ -1,5 +1,5 @@
 /**
- * Easy mode: when the inserter opens, hide every tab except Patterns and
+ * Simple mode: when the inserter opens, hide every tab except Patterns and
  * auto-select Patterns. Implemented as a one-shot MutationObserver so we
  * react to the inserter mounting without polling.
  *
@@ -7,6 +7,8 @@
  * `data-tab-id`, so this is resilient to ID renames between Gutenberg
  * releases as long as the label stays "Patterns".
  */
+
+import { getObserverTarget } from './observer-target';
 
 let observer = null;
 
@@ -84,5 +86,8 @@ export function setupEasyPatternsOnly( level ) {
 			processInserter( inserter );
 		}
 	} );
-	observer.observe( document.body, { childList: true, subtree: true } );
+	const target = getObserverTarget();
+	if ( target ) {
+		observer.observe( target, { childList: true, subtree: true } );
+	}
 }
