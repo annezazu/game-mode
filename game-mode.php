@@ -129,6 +129,90 @@ function game_mode_register_user_meta() {
 add_action( 'init', 'game_mode_register_user_meta' );
 
 /**
+ * Block-name prefixes treated as "theme blocks" — dynamic blocks that depend
+ * on post / site / query context. Kept in sync with the JS list in
+ * `src/filters/theme-blocks-inserter.js`.
+ *
+ * Wrapped in a function so theme authors / extenders can filter the list.
+ */
+function game_mode_theme_block_prefixes() {
+	$prefixes = array(
+		'core/post-',
+		'core/template-part',
+		'core/query',
+		'core/comment',
+		'core/comments',
+		'core/loginout',
+		'core/avatar',
+		'core/term-description',
+		'core/archives',
+		'core/categories',
+		'core/calendar',
+		'core/latest-posts',
+		'core/latest-comments',
+		'core/tag-cloud',
+		'core/rss',
+		'core/search',
+		'core/read-more',
+	);
+	/**
+	 * Filter the list of block-name prefixes that Game Mode treats as
+	 * "theme blocks" and hides from the inserter in Simple level.
+	 *
+	 * @param string[] $prefixes Block-name prefixes (`core/post-`, etc.).
+	 */
+	return apply_filters( 'game_mode_theme_block_prefixes', $prefixes );
+}
+
+/**
+ * Returns true when the given block name should be treated as a theme block.
+ */
+function game_mode_is_theme_block( $name, $category = '' ) {
+	if ( 'theme' === $category ) {
+		return true;
+	}
+	foreach ( game_mode_theme_block_prefixes() as $prefix ) {
+		if ( $name === rtrim( $prefix, '-' ) || strpos( $name, $prefix ) === 0 ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Restrict the inserter to non-theme blocks for users on Simple level.
+ *
+ * Hooks `allowed_block_types_all` — the canonical WP filter for
+ * per-editor-context allowed-block lists. Enforced by core, so it covers
+ * paste / slash-command / drag-drop in addition to the inserter sidebar.
+ *
+ * Belt-and-braces with the JS `blocks.registerBlockType` filter in
+ * `src/filters/theme-blocks-inserter.js`, which sets `supports.inserter`
+ * false for the same set so the block also disappears from any future
+ * inserter UI that doesn't consult `allowed_block_types_all`.
+ */
+function game_mode_filter_allowed_block_types( $allowed, $editor_context ) {
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return $allowed;
+	}
+	$level = get_user_meta( $user_id, 'game_mode_level', true );
+	if ( 'easy' !== $level ) {
+		return $allowed;
+	}
+	$registry = WP_Block_Type_Registry::get_instance()->get_all_registered();
+	$names    = array();
+	foreach ( $registry as $name => $type ) {
+		$category = isset( $type->category ) ? $type->category : '';
+		if ( ! game_mode_is_theme_block( $name, $category ) ) {
+			$names[] = $name;
+		}
+	}
+	return $names;
+}
+add_filter( 'allowed_block_types_all', 'game_mode_filter_allowed_block_types', 10, 2 );
+
+/**
  * Expose the active level via the canonical `block_editor_settings_all`
  * filter so any block-editor context (post editor, site editor, or
  * future Gutenberg-powered editors) can read it through the standard
