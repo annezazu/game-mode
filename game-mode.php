@@ -94,34 +94,39 @@ function game_mode_filter_pattern_args( $pattern_properties, $pattern_name ) {
 add_filter( 'register_block_pattern_args', 'game_mode_filter_pattern_args', 10, 2 );
 
 /**
- * REST endpoint to mirror the level into user meta so server-side filters
- * (like the pattern wrapper above) see the same value as the JS preferences
- * store.
+ * Register `game_mode_level` as a per-user meta exposed to the REST API.
+ *
+ * This replaces a previous custom `game-mode/v1/level` REST endpoint. By
+ * registering the meta with `show_in_rest`, the value is automatically
+ * read/writeable via the canonical `/wp/v2/users/me` endpoint — no custom
+ * REST route, no bespoke schema, no second auth surface to audit.
+ *
+ * The JS in `src/store.js` writes via `apiFetch( { path: '/wp/v2/users/me' } )`
+ * with `{ meta: { game_mode_level: level } }`.
  */
-function game_mode_register_rest() {
-	register_rest_route(
-		'game-mode/v1',
-		'/level',
+function game_mode_register_user_meta() {
+	register_meta(
+		'user',
+		'game_mode_level',
 		array(
-			'methods'             => 'POST',
-			'permission_callback' => function () {
-				return current_user_can( 'edit_theme_options' );
-			},
-			'args'                => array(
-				'level' => array(
-					'type'     => 'string',
-					'enum'     => array( 'easy', 'medium', 'hard' ),
-					'required' => true,
+			'type'              => 'string',
+			'single'            => true,
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type' => 'string',
+					'enum' => array( '', 'easy', 'medium', 'hard' ),
 				),
 			),
-			'callback'            => function ( $request ) {
-				update_user_meta( get_current_user_id(), 'game_mode_level', $request['level'] );
-				return array( 'level' => $request['level'] );
+			'auth_callback'     => function () {
+				return current_user_can( 'edit_theme_options' );
+			},
+			'sanitize_callback' => function ( $value ) {
+				return in_array( $value, array( 'easy', 'medium', 'hard' ), true ) ? $value : '';
 			},
 		)
 	);
 }
-add_action( 'rest_api_init', 'game_mode_register_rest' );
+add_action( 'init', 'game_mode_register_user_meta' );
 
 /**
  * Expose the active level via the canonical `block_editor_settings_all`
