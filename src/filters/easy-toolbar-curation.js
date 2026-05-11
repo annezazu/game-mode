@@ -32,18 +32,30 @@ let unsubscribe = null;
 /**
  * Try to unregister every format in FORMATS_TO_DROP.
  * Returns the count of formats still pending registration.
+ *
+ * Defensive against throws: rich-text store may not be mounted yet at the
+ * point this runs, and `getFormatType` can return undefined / throw if the
+ * registry isn't initialized.
  */
 function tryUnregisterAll() {
 	let pending = 0;
 	FORMATS_TO_DROP.forEach( ( name ) => {
-		if ( ! getFormatType( name ) ) {
+		let registered = null;
+		try {
+			registered = getFormatType( name );
+		} catch ( _e ) {
+			// Registry not ready.
+			pending += 1;
+			return;
+		}
+		if ( ! registered ) {
 			pending += 1;
 			return;
 		}
 		try {
 			unregisterFormatType( name );
-		} catch ( e ) {
-			// Already unregistered or never registered — silent no-op.
+		} catch ( _e ) {
+			// Already unregistered or in a weird state — silent no-op.
 		}
 	} );
 	return pending;
@@ -51,7 +63,9 @@ function tryUnregisterAll() {
 
 export function setupEasyToolbarCuration( level ) {
 	if ( unsubscribe ) {
-		unsubscribe();
+		try {
+			unsubscribe();
+		} catch ( _e ) {}
 		unsubscribe = null;
 	}
 	if ( level !== 'easy' ) {
@@ -60,15 +74,30 @@ export function setupEasyToolbarCuration( level ) {
 		// set again.
 		return;
 	}
-	if ( tryUnregisterAll() === 0 ) {
+	let pending;
+	try {
+		pending = tryUnregisterAll();
+	} catch ( _e ) {
+		return;
+	}
+	if ( pending === 0 ) {
 		return;
 	}
 	// Some formats not yet registered — subscribe and retry until they are.
 	let attempts = 0;
-	unsubscribe = subscribe( () => {
-		if ( tryUnregisterAll() === 0 || ++attempts > 50 ) {
-			unsubscribe?.();
-			unsubscribe = null;
-		}
-	} );
+	try {
+		unsubscribe = subscribe( () => {
+			try {
+				if ( tryUnregisterAll() === 0 || ++attempts > 50 ) {
+					unsubscribe?.();
+					unsubscribe = null;
+				}
+			} catch ( _e ) {
+				unsubscribe?.();
+				unsubscribe = null;
+			}
+		} );
+	} catch ( _e ) {
+		// `subscribe` not available — give up silently.
+	}
 }
