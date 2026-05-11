@@ -1,5 +1,5 @@
 /**
- * Easy mode block inspector restrictions:
+ * Simple mode block inspector restrictions:
  *
  * 1. Auto-select the Styles tab when the inspector tabs render (so the user
  *    doesn't land on a hidden Settings tab and see an empty inspector).
@@ -10,6 +10,8 @@
  * not `aria-label`, so CSS attribute selectors (and `:has()` with them) can't
  * match.
  */
+
+import { getObserverTarget } from './observer-target';
 
 let observer = null;
 const STYLES_TAB_PROCESSED = 'data-game-mode-styles-activated';
@@ -104,7 +106,7 @@ function activateStylesTab( root ) {
 		stylesTab.click();
 	}
 	// After activation, hide the entire tablist — only Styles is meaningful
-	// in Easy mode. Defer so framer-motion / focus management isn't disrupted.
+	// in Simple mode. Defer so framer-motion / focus management isn't disrupted.
 	if ( tablist ) {
 		setTimeout( () => {
 			hideAccessibly( tablist );
@@ -163,5 +165,8 @@ export function setupEasyBlockInspector( level ) {
 			hidePanelsByLabel( el );
 		} );
 	} );
-	observer.observe( document.body, { childList: true, subtree: true } );
+	const target = getObserverTarget();
+	if ( target ) {
+		observer.observe( target, { childList: true, subtree: true } );
+	}
 }

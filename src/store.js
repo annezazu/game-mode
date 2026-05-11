@@ -2,7 +2,11 @@
  * Light wrapper over core/preferences for the `game-mode` scope.
  */
 
-import { useSelect, useDispatch, dispatch as globalDispatch } from '@wordpress/data';
+import {
+	useSelect,
+	useDispatch,
+	dispatch as globalDispatch,
+} from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as noticesStore } from '@wordpress/notices';
 import { useCallback } from '@wordpress/element';
@@ -13,6 +17,7 @@ import { LEVELS, LEVEL_KEYS } from './levels';
 
 const SCOPE = 'game-mode';
 const KEY = 'level';
+const GEOMETRY_KEY = 'switcherGeometry';
 
 /**
  * Read the current level from preferences. Returns null if unset.
@@ -73,7 +78,10 @@ export function useSetLevel() {
 				// Surface a snackbar so the failure isn't silent.
 				if ( typeof console !== 'undefined' ) {
 					// eslint-disable-next-line no-console
-					console.warn( '[game-mode] failed to mirror level to user meta:', e );
+					console.warn(
+						'[game-mode] failed to mirror level to user meta:',
+						e
+					);
 				}
 				try {
 					globalDispatch( noticesStore ).createWarningNotice(
@@ -95,4 +103,28 @@ export function useSetLevel() {
 	);
 }
 
-export { SCOPE, KEY };
+/**
+ * Read the persisted Kilim geometry tuple for the floating switcher.
+ * Returns null if unset or malformed.
+ */
+export function useSwitcherGeometry() {
+	return useSelect( ( select ) => {
+		const value = select( preferencesStore ).get( SCOPE, GEOMETRY_KEY );
+		return Array.isArray( value ) && value.length === 5 ? value : null;
+	}, [] );
+}
+
+/**
+ * Hook returning a setter that persists the switcher geometry tuple.
+ */
+export function useSetSwitcherGeometry() {
+	const { set } = useDispatch( preferencesStore );
+	return useCallback(
+		( geometry ) => {
+			set( SCOPE, GEOMETRY_KEY, geometry );
+		},
+		[ set ]
+	);
+}
+
+export { SCOPE, KEY, GEOMETRY_KEY };
