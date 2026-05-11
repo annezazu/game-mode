@@ -1,10 +1,12 @@
 /**
- * Advanced mode: open the document list view by default.
+ * Open the document list view by default on editor mount.
  *
- * `showListView` (in the level's `prefs`) governs the *preference* — it
- * decides whether the toggle is visible / on by default. To actually open
- * the list view panel on editor mount we dispatch `setIsListViewOpened`
- * on the relevant store.
+ * User feedback consistently shows List View helps people get a sense of
+ * the structure of their site, so we open it automatically across every
+ * level. `showListView` (in each level's `prefs`) governs the *preference*
+ * — it decides whether the toggle is visible / on by default. To actually
+ * open the list view panel we dispatch `setIsListViewOpened` on the
+ * relevant store.
  *
  * The action moved between stores across recent WordPress releases
  * (`core/edit-post` → `core/edit-site` → `core/editor`), so we dispatch
@@ -40,9 +42,9 @@ function openListView() {
 	}
 }
 
-export function setupAdvancedListView( level ) {
+export function setupAutoListView( level ) {
 	opened = false;
-	if ( level !== 'hard' ) {
+	if ( ! level ) {
 		return;
 	}
 	openListView();

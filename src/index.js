@@ -41,7 +41,7 @@ import { setupBlockDirectoryControl } from './filters/block-directory';
 import { setupHardNoContentOnly } from './filters/hard-no-content-only';
 import { setupPatternContentOnly } from './filters/pattern-content-only';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
-import { setupAdvancedListView } from './filters/advanced-list-view';
+import { setupAutoListView } from './filters/auto-list-view';
 import {
 	installBeforeUnloadSwallow,
 	armBeforeUnloadSwallow,
@@ -130,7 +130,7 @@ function applyLevelEffects( level ) {
 	setupEasyStylesMenu( level );
 	setupEasyBlockInspector( level );
 	setupBlockDirectoryControl( level );
-	setupAdvancedListView( level );
+	setupAutoListView( level );
 	setupHardNoContentOnly( level );
 	setupPatternContentOnly( level );
 	setupEasyLockRemove( level );
