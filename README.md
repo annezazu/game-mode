@@ -93,6 +93,14 @@ In addition, several filters depend on **DOM-text matching against editor labels
 
 Also worth noting: `showSimpleTopbar` and `showBlockHelpers` in `src/levels.js` mirror an unmerged Gutenberg PR ([#74546](https://github.com/WordPress/gutenberg/pull/74546)). On stock WordPress they are no-ops; the visual effect is provided by the CSS in `src/filters/distraction-free-config.js`.
 
+## Known limitations
+
+**Root-block lock attributes persist after an explicit save on Simple.** `src/filters/easy-lock-remove.js` writes `lock.remove: true` to root blocks while on Simple so Backspace can't wipe a whole section. The write is marked non-persistent via `__unstableMarkNextChangeAsNotPersistent`, but if the user explicitly saves the template/page while on Simple, the attribute goes along for the ride into the saved post_content. After switching to Intermediate or Advanced, those blocks still render with the lock icon until they're re-saved at the higher level.
+
+Workaround: open the affected block on Advanced, click the toolbar lock icon to unlock, and save. Or wait until you next edit and re-save the template — `easy-lock-remove`'s cleanup pass strips the attribute in memory on level switch, so the next save will write a clean copy.
+
+This isn't fixed in code because every clean fix path (filtering on render, rewriting on save, intercepting `canRemoveBlock`) carries enough Core-coupling and edge-case risk to outweigh the cost of a niche visual nuisance.
+
 ## License
 
 GPL-2.0-or-later.
