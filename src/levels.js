@@ -3,7 +3,6 @@
  *
  * Each level provides:
  * - meta: label, description, icon, accent color
- * - patternsContentOnly: wrap registered patterns in a contentOnly Group
  * - allowThemeBlocks: false → hide theme/site/post/query/template-part blocks from inserter
  * - blockSupports: 'minimal' | 'default' | 'expanded'
  * - prefs: object of core/preferences values to apply for this level
@@ -31,7 +30,6 @@ export const LEVELS = {
 			__( 'Adjust basic styling like color and font size', 'game-mode' ),
 			__( 'Drop in patterns and edit their content', 'game-mode' ),
 		],
-		patternsContentOnly: true,
 		allowThemeBlocks: false,
 		blockSupports: 'minimal',
 		prefs: {
@@ -69,7 +67,6 @@ export const LEVELS = {
 			__( 'Fine-tune styling with the full set of standard controls', 'game-mode' ),
 			__( 'Drop in patterns and edit their content', 'game-mode' ),
 		],
-		patternsContentOnly: true,
 		allowThemeBlocks: true,
 		blockSupports: 'default',
 		prefs: {
@@ -106,7 +103,6 @@ export const LEVELS = {
 			__( 'Reach every control without digging through menus.', 'game-mode' ),
 			__( 'Install new blocks from the block directory', 'game-mode' ),
 		],
-		patternsContentOnly: false,
 		allowThemeBlocks: true,
 		blockSupports: 'expanded',
 		prefs: {

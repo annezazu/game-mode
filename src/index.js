@@ -39,7 +39,6 @@ import { setupEasyStylesMenu } from './filters/easy-styles-menu';
 import { setupEasyBlockInspector } from './filters/easy-block-inspector';
 import { setupBlockDirectoryControl } from './filters/block-directory';
 import { setupHardNoContentOnly } from './filters/hard-no-content-only';
-import { setupPatternContentOnly } from './filters/pattern-content-only';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
 import { setupAutoListView } from './filters/auto-list-view';
 import {
@@ -99,26 +98,14 @@ if ( typeof window !== 'undefined' ) {
 /**
  * Apply / re-apply all level-driven editor effects.
  *
- * `setupHardNoContentOnly`, `setupPatternContentOnly`, and `setupEasyLockRemove`
- * each install a `@wordpress/data` subscription on `core/block-editor` that
- * dispatches back into the same store when blocks need their editing mode or
- * `lock` attribute updated. If two of those subscribers are alive at the same
- * time (e.g. an "easy" pattern subscriber running while we set up the "hard"
- * subscriber on a level switch), each can keep re-triggering the other and
- * blow the call stack inside `combinedReducer`.
- *
- * To avoid that, this helper runs in two phases:
- *
- *   1. Tear down every subscribing filter (passing `null` makes each
- *      `setup*` short-circuit after `unsubscribe()`).
- *   2. Set up the filters appropriate to the new level. Because no foreign
- *      subscriber is active during phase 2, the initial walks do not
- *      cross-talk with stale subscriptions.
+ * `setupEasyLockRemove` installs a `@wordpress/data` subscription on
+ * `core/block-editor` that dispatches back into the same store. We tear it
+ * down before re-running it on a level switch so a stale subscriber can't
+ * cross-talk with the fresh walk and blow the stack inside
+ * `combinedReducer`.
  */
 function applyLevelEffects( level ) {
 	// Phase 1: tear down dispatch-causing subscribers.
-	setupHardNoContentOnly( null );
-	setupPatternContentOnly( null );
 	setupEasyLockRemove( null );
 
 	// Phase 2: set up for the new level.
@@ -132,7 +119,6 @@ function applyLevelEffects( level ) {
 	setupBlockDirectoryControl( level );
 	setupAutoListView( level );
 	setupHardNoContentOnly( level );
-	setupPatternContentOnly( level );
 	setupEasyLockRemove( level );
 }
 
