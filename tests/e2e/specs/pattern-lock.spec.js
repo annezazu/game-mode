@@ -1,15 +1,14 @@
 /**
- * Regression spec — pattern locking behavior across levels.
+ * Regression spec — pattern editing mode across levels.
  *
- *   - In Simple: an inserted pattern's wrapper block must be locked
- *     (lock.remove + lock.move) AND in `contentOnly` editing mode, so the
- *     user can edit text/images inside but cannot restructure or delete
- *     the pattern itself.
- *   - In Advanced: the wrapper must be in `default` editing mode with no
- *     leftover `lock` from the previous level — fully editable.
+ *   - Simple:       wrapper `contentOnly`  (inner structure locked,
+ *                                            content-editable; wrapper
+ *                                            itself remains deletable)
+ *   - Intermediate: wrapper `contentOnly`  (same)
+ *   - Advanced:     wrapper `default`      (fully editable)
  *
- * We assert via `wp.data` rather than DOM scraping so the test is robust
- * to toolbar/inspector shuffles in the editor UI.
+ * No attribute writes — locking lives in session-only block editing
+ * modes, never serialized into saved markup.
  */
 
 const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
@@ -68,9 +67,14 @@ async function readBlockState( page, clientId ) {
 	return page.evaluate( ( id ) => {
 		const be = window.wp.data.select( 'core/block-editor' );
 		const block = be.getBlock( id );
+		const childIds = be.getBlockOrder( id );
 		return {
 			mode: be.getBlockEditingMode?.( id ),
+			childMode: childIds[ 0 ]
+				? be.getBlockEditingMode?.( childIds[ 0 ] )
+				: null,
 			lock: block?.attributes?.lock || null,
+			canRemove: be.canRemoveBlock?.( id ) ?? null,
 			patternName: block?.attributes?.metadata?.patternName || null,
 		};
 	}, clientId );
@@ -89,7 +93,7 @@ test.describe( 'Pattern lock across levels', () => {
 		} );
 	} );
 
-	test( 'Simple locks the pattern wrapper; Advanced unlocks it', async ( {
+	test( 'Simple: wrapper editing mode is `contentOnly`', async ( {
 		admin,
 		requestUtils,
 		page,
@@ -98,42 +102,48 @@ test.describe( 'Pattern lock across levels', () => {
 			{ admin, requestUtils, page },
 			'easy'
 		);
-
 		const clientId = await insertSyntheticPattern( page );
-
-		// Give the subscriber a tick to walk + apply locks.
 		await page.waitForTimeout( 200 );
 
-		const inSimple = await readBlockState( page, clientId );
-		expect( inSimple.patternName ).toBeTruthy();
-		expect( inSimple.mode ).toBe( 'contentOnly' );
-		expect( inSimple.lock?.remove ).toBe( true );
-		expect( inSimple.lock?.move ).toBe( true );
+		const state = await readBlockState( page, clientId );
+		expect( state.patternName ).toBeTruthy();
+		expect( state.mode ).toBe( 'contentOnly' );
+		expect( state.childMode ).toBe( 'contentOnly' );
+	} );
 
-		// Switch to Advanced via the switcher dropdown.
-		page.on( 'dialog', ( d ) => d.dismiss().catch( () => {} ) );
-		await page
-			.getByRole( 'button', { name: /game mode/i } )
-			.click();
-		await page
-			.getByRole( 'menuitemradio', { name: /advanced/i } )
-			.click();
-		await page.waitForLoadState( 'load' );
-		await expect(
-			page.getByRole( 'button', { name: /game mode: advanced/i } )
-		).toBeVisible( { timeout: 30_000 } );
-
-		// Re-insert (post reloaded with persisted state may or may not
-		// contain the pattern depending on save flow — keep this test
-		// self-contained by re-inserting in Advanced).
-		const advancedClientId = await insertSyntheticPattern( page );
+	test( 'Intermediate: wrapper editing mode is `contentOnly`', async ( {
+		admin,
+		requestUtils,
+		page,
+	} ) => {
+		await setLevelMetaAndOpenEditor(
+			{ admin, requestUtils, page },
+			'medium'
+		);
+		const clientId = await insertSyntheticPattern( page );
 		await page.waitForTimeout( 200 );
 
-		const inAdvanced = await readBlockState( page, advancedClientId );
-		expect( inAdvanced.patternName ).toBeTruthy();
-		expect( inAdvanced.mode ).toBe( 'default' );
-		expect(
-			inAdvanced.lock?.remove === true && inAdvanced.lock?.move === true
-		).toBe( false );
+		const state = await readBlockState( page, clientId );
+		expect( state.patternName ).toBeTruthy();
+		expect( state.mode ).toBe( 'contentOnly' );
+		expect( state.childMode ).toBe( 'contentOnly' );
+	} );
+
+	test( 'Advanced: wrapper editing mode is `default`', async ( {
+		admin,
+		requestUtils,
+		page,
+	} ) => {
+		await setLevelMetaAndOpenEditor(
+			{ admin, requestUtils, page },
+			'hard'
+		);
+		const clientId = await insertSyntheticPattern( page );
+		await page.waitForTimeout( 200 );
+
+		const state = await readBlockState( page, clientId );
+		expect( state.patternName ).toBeTruthy();
+		expect( state.mode ).toBe( 'default' );
+		expect( state.childMode ).toBe( 'default' );
 	} );
 } );
