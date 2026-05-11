@@ -10,7 +10,9 @@
     "start": "wp-scripts start",
     "lint:js": "wp-scripts lint-js",
     "test": "wp-scripts test-unit-js",
-    "format": "wp-scripts format"
+    "test:e2e": "wp-scripts test-playwright --config playwright.config.js",
+    "format": "wp-scripts format",
+    "wp-env": "wp-env"
   },
   "devDependencies": {
     "@wordpress/api-fetch": "^7.45.0",
