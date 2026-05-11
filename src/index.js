@@ -37,7 +37,6 @@ import { setupEasyPatternsOnly } from './filters/easy-patterns-only-inserter';
 import { setupEasyStylesMenu } from './filters/easy-styles-menu';
 import { setupEasyBlockInspector } from './filters/easy-block-inspector';
 import { setupBlockDirectoryControl } from './filters/block-directory';
-import { setupHardNoContentOnly } from './filters/hard-no-content-only';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
 import { setupAutoListView } from './filters/auto-list-view';
 import {
@@ -116,7 +115,6 @@ function applyLevelEffects( level ) {
 	setupEasyBlockInspector( level );
 	setupBlockDirectoryControl( level );
 	setupAutoListView( level );
-	setupHardNoContentOnly( level );
 	setupEasyLockRemove( level );
 }
 
