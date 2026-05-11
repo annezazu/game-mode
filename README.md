@@ -18,6 +18,7 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 | Inserter tabs | Patterns only | all tabs | all tabs |
 | Choose-pattern modal on new pages (`enableChoosePatternModal`) | enabled | enabled | disabled |
 | Block-directory installs | disabled | disabled | enabled |
+| RichText toolbar formats | bold / italic / underline / strike / link / inline-code / text-color | full | full |
 | Code Editor (`codeEditingEnabled`) | disabled | disabled | enabled |
 | Styles sidebar | Browse styles + Colors + Typography + Background only | full | full |
 | Pattern editing UX | locked unless "Edit pattern" clicked | auto-unlocked | auto-unlocked |
