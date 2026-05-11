@@ -1,5 +1,5 @@
 /**
- * Single source of truth for level configuration.
+ * Single source of truth for client-side level configuration.
  *
  * Each level provides:
  * - meta: label, description, icon, accent color
@@ -8,6 +8,11 @@
  * - prefs: object of core/preferences values to apply for this level
  *   (keys are core preference names; values are booleans).
  *   Includes the bundled PR #74546 keys (showSimpleTopbar, showBlockHelpers).
+ *
+ * Server-side editor settings (applied via `block_editor_settings_all`,
+ * e.g. `codeEditingEnabled`, `canLockBlocks`) live in `game-mode.php`
+ * rather than here — they're read by PHP from the user's level meta and
+ * merged into the editor settings before the editor mounts.
  */
 
 import { __ } from '@wordpress/i18n';
