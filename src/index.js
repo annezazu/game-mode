@@ -32,7 +32,6 @@ import {
 	KEY,
 } from './store';
 import { registerBlockSupportsFilter } from './filters/block-supports';
-import { registerThemeBlocksInserterFilter } from './filters/theme-blocks-inserter';
 import { applyDistractionFreeConfig } from './filters/distraction-free-config';
 import { setupEasyPatternsOnly } from './filters/easy-patterns-only-inserter';
 import { setupEasyStylesMenu } from './filters/easy-styles-menu';
@@ -85,7 +84,6 @@ if ( cachedLevel ) {
 
 // Register registerBlockType filters once at module load.
 registerBlockSupportsFilter( getLevel );
-registerThemeBlocksInserterFilter( getLevel );
 
 // Install the beforeunload swallower at module load. Listeners on `window`
 // fire in registration order regardless of capture flag, so this has to win

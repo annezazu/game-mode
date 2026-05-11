@@ -99,18 +99,31 @@ add_action( 'init', 'game_mode_register_user_meta' );
 
 /**
  * Block-name prefixes treated as "theme blocks" — dynamic blocks that depend
- * on post / site / query context. Kept in sync with the JS list in
- * `src/filters/theme-blocks-inserter.js`.
+ * on post / site / query context. Single source of truth: the previous JS
+ * mirror in `src/filters/theme-blocks-inserter.js` has been removed in
+ * favor of doing all theme-block hiding server-side via
+ * `allowed_block_types_all`.
+ *
+ * Most of these are already redundant with the `category === 'theme'`
+ * short-circuit in `game_mode_is_theme_block` for Core blocks, but listing
+ * explicit prefixes also catches non-`theme`-categorized children (e.g.
+ * `core/navigation-link`, `core/comment-author-name`, `core/post-content`).
  *
  * Wrapped in a function so theme authors / extenders can filter the list.
  */
 function game_mode_theme_block_prefixes() {
 	$prefixes = array(
 		'core/post-',
+		'core/site-',
 		'core/template-part',
 		'core/query',
 		'core/comment',
 		'core/comments',
+		'core/navigation',
+		'core/navigation-link',
+		'core/navigation-submenu',
+		'core/home-link',
+		'core/page-list',
 		'core/loginout',
 		'core/avatar',
 		'core/term-description',
@@ -154,11 +167,6 @@ function game_mode_is_theme_block( $name, $category = '' ) {
  * Hooks `allowed_block_types_all` — the canonical WP filter for
  * per-editor-context allowed-block lists. Enforced by core, so it covers
  * paste / slash-command / drag-drop in addition to the inserter sidebar.
- *
- * Belt-and-braces with the JS `blocks.registerBlockType` filter in
- * `src/filters/theme-blocks-inserter.js`, which sets `supports.inserter`
- * false for the same set so the block also disappears from any future
- * inserter UI that doesn't consult `allowed_block_types_all`.
  */
 function game_mode_filter_allowed_block_types( $allowed, $editor_context ) {
 	$user_id = get_current_user_id();
