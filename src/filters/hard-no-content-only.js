@@ -30,14 +30,23 @@ function clearContentOnly( clientId, attributes ) {
 	if ( attributes?.templateLock !== 'contentOnly' ) {
 		return;
 	}
-	dispatch( blockEditorStore ).updateBlockAttributes( clientId, {
+	const blockEditor = dispatch( blockEditorStore );
+	// Mark non-persistent so this clear doesn't dirty the post — otherwise
+	// switching levels triggers the browser's "leave site?" dialog instead
+	// of our own save-before-switching prompt.
+	blockEditor.__unstableMarkNextChangeAsNotPersistent?.();
+	blockEditor.updateBlockAttributes( clientId, {
 		templateLock: undefined,
 	} );
 }
 
 function clearEditingMode( editor, clientId ) {
 	const mode = editor.getBlockEditingMode?.( clientId );
-	if ( mode === 'contentOnly' || mode === 'disabled' ) {
+	// Catch every non-default mode WP 7.0's pattern-editing UX may apply,
+	// not just `contentOnly` / `disabled`. The pattern wrapper often lands
+	// with mode === undefined briefly while core resolves it; we want to
+	// pin it to `default` either way.
+	if ( mode && mode !== 'default' ) {
 		dispatch( blockEditorStore ).setBlockEditingMode?.( clientId, 'default' );
 	}
 }

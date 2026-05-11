@@ -39,6 +39,7 @@ import { setupEasyStylesMenu } from './filters/easy-styles-menu';
 import { setupEasyBlockInspector } from './filters/easy-block-inspector';
 import { setupBlockDirectoryControl } from './filters/block-directory';
 import { setupHardNoContentOnly } from './filters/hard-no-content-only';
+import { setupPatternContentOnly } from './filters/pattern-content-only';
 import { setupEasyLockRemove } from './filters/easy-lock-remove';
 import { setupAdvancedListView } from './filters/advanced-list-view';
 import LevelPickerModal from './components/LevelPickerModal';
@@ -83,20 +84,50 @@ if ( cachedLevel ) {
 registerBlockSupportsFilter( getLevel );
 registerThemeBlocksInserterFilter( getLevel );
 
+/**
+ * Apply / re-apply all level-driven editor effects.
+ *
+ * `setupHardNoContentOnly`, `setupPatternContentOnly`, and `setupEasyLockRemove`
+ * each install a `@wordpress/data` subscription on `core/block-editor` that
+ * dispatches back into the same store when blocks need their editing mode or
+ * `lock` attribute updated. If two of those subscribers are alive at the same
+ * time (e.g. an "easy" pattern subscriber running while we set up the "hard"
+ * subscriber on a level switch), each can keep re-triggering the other and
+ * blow the call stack inside `combinedReducer`.
+ *
+ * To avoid that, this helper runs in two phases:
+ *
+ *   1. Tear down every subscribing filter (passing `null` makes each
+ *      `setup*` short-circuit after `unsubscribe()`).
+ *   2. Set up the filters appropriate to the new level. Because no foreign
+ *      subscriber is active during phase 2, the initial walks do not
+ *      cross-talk with stale subscriptions.
+ */
+function applyLevelEffects( level ) {
+	// Phase 1: tear down dispatch-causing subscribers.
+	setupHardNoContentOnly( null );
+	setupPatternContentOnly( null );
+	setupEasyLockRemove( null );
+
+	// Phase 2: set up for the new level.
+	applyDistractionFreeConfig( level );
+	if ( typeof document !== 'undefined' ) {
+		document.body.dataset.gameMode = level;
+	}
+	setupEasyPatternsOnly( level );
+	setupEasyStylesMenu( level );
+	setupEasyBlockInspector( level );
+	setupBlockDirectoryControl( level );
+	setupAdvancedListView( level );
+	setupHardNoContentOnly( level );
+	setupPatternContentOnly( level );
+	setupEasyLockRemove( level );
+}
+
 // Apply distraction-free CSS as soon as the document is ready and tag the
 // body so level-scoped CSS rules (like Advanced mode's "no hidden controls") fire.
 if ( cachedLevel ) {
-	applyDistractionFreeConfig( cachedLevel );
-	if ( typeof document !== 'undefined' ) {
-		document.body.dataset.gameMode = cachedLevel;
-	}
-	setupEasyPatternsOnly( cachedLevel );
-	setupEasyStylesMenu( cachedLevel );
-	setupEasyBlockInspector( cachedLevel );
-	setupBlockDirectoryControl( cachedLevel );
-	setupHardNoContentOnly( cachedLevel );
-	setupEasyLockRemove( cachedLevel );
-	setupAdvancedListView( cachedLevel );
+	applyLevelEffects( cachedLevel );
 	// Re-apply preferences for the active level on every boot so
 	// `distractionFree`, `showListView`, etc. reflect the level instead of
 	// whatever the user had set last session. We dispatch into two scopes:
@@ -145,15 +176,7 @@ function GameModeUI() {
 	useEffect( () => {
 		if ( level ) {
 			cachedLevel = level;
-			applyDistractionFreeConfig( level );
-			document.body.dataset.gameMode = level;
-			setupEasyPatternsOnly( level );
-			setupEasyStylesMenu( level );
-			setupEasyBlockInspector( level );
-			setupBlockDirectoryControl( level );
-			setupHardNoContentOnly( level );
-			setupEasyLockRemove( level );
-			setupAdvancedListView( level );
+			applyLevelEffects( level );
 		}
 	}, [ level ] );
 
