@@ -1,21 +1,27 @@
 /**
+ * Hide editor chrome via injected CSS for levels that opted out of it.
  * Bundles the configurable distraction-free pieces from Gutenberg PR #74546
- * into the plugin so Simple/Intermediate can offer gradation today.
+ * so Simple/Intermediate can offer gradation today.
  *
- * Two new sub-preferences:
+ * NOTE: this file does NOT touch WP's `distractionFree` core preference.
+ * (Earlier iterations did, hence the previous file name
+ * `distraction-free-config.js`.) Renamed to clarify that the mechanism is
+ * purely a CSS overlay — the user's actual distraction-free preference is
+ * preserved across level switches.
+ *
+ * Two sub-preferences read from each level's `prefs`:
  * - `showSimpleTopbar` — when false, hide inserter/list-view/zoom toggles.
  * - `showBlockHelpers` — when false, hide insertion points, in-between
  *    inserter, grid visualizer, and block highlight effects.
  *
- * Approach: read the current level's prefs and inject scoped CSS that hides
- * the corresponding affordances. CSS-only is sufficient because none of these
- * affordances enable functionality not available elsewhere — they're purely
- * visual chrome the user has opted out of for that level.
+ * CSS-only is sufficient because none of these affordances enable
+ * functionality not available elsewhere — they're purely visual chrome the
+ * user has opted out of for that level.
  */
 
 import { LEVELS } from '../levels';
 
-const STYLE_ID = 'game-mode-distraction-free-config';
+const STYLE_ID = 'game-mode-simple-chrome-hide';
 
 const CSS_RULES = {
 	showSimpleTopbar: {
