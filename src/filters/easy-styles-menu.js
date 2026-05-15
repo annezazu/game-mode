@@ -210,10 +210,15 @@ function processStylesScreen() {
 		} );
 	} );
 
-	// Phrase-based hiding can still run across the whole styles sidebar.
+	// Phrase-based hiding runs across the whole styles sidebar AND any root
+	// styles screen (the Design > Styles route in WP 7.0+ uses the root
+	// screen container but is not inside the right-hand styles sidebar).
 	// Detail screens won't contain our blocked phrases, so this is safe.
-	const sidebars = findStylesSidebars();
-	sidebars.forEach( ( sidebar ) => {
+	const phraseContainers = new Set( [
+		...findStylesSidebars(),
+		...rootScreens,
+	] );
+	phraseContainers.forEach( ( sidebar ) => {
 		const textCandidates = sidebar.querySelectorAll(
 			'p, span, .components-text, .components-truncate, h2, h3'
 		);
