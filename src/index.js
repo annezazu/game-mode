@@ -347,8 +347,9 @@ function GameModeUI() {
 				<Kilim
 					className="game-mode-switcher__kilim"
 					initialGeometry={
-						savedGeometry ?? [ 'bottom-right', 16, 16, 180, 56 ]
+						savedGeometry ?? [ 'bottom-right', 20, 20, 180, 56 ]
 					}
+					margin={ 20 }
 					resizable={ false }
 					onMoveEnd={ setSwitcherGeometry }
 				>
