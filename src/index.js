@@ -32,7 +32,7 @@ import {
 	KEY,
 } from './store';
 import { registerBlockSupportsFilter } from './filters/block-supports';
-import { applyDistractionFreeConfig } from './filters/distraction-free-config';
+import { applyDistractionFreeConfig } from './filters/simple-chrome-hide';
 import { setupEasyPatternsOnly } from './filters/easy-patterns-only-inserter';
 import { setupEasyStylesMenu } from './filters/easy-styles-menu';
 import { setupEasyBlockInspector } from './filters/easy-block-inspector';
@@ -326,7 +326,7 @@ function GameModeUI() {
 						{ sprintf(
 							/* translators: %s: target level label */
 							__(
-								'You have unsaved changes. Switching to %s will reload the editor.',
+								'You have unsaved changes. Switching to %s will reload the editor with the new level’s controls applied.',
 								'game-mode'
 							),
 							LEVELS[ pendingSwitch.next ].label
