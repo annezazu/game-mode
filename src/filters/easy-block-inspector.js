@@ -13,6 +13,7 @@
 
 import { select } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
+import { __ } from '@wordpress/i18n';
 
 import { getObserverTarget } from './observer-target';
 
@@ -52,15 +53,42 @@ function hideAccessibly( el ) {
 	el.dataset.gameModeHidden = 'true';
 }
 
-const HIDDEN_PANEL_LABELS = new Set( [
-	'layout',
-	'dimensions',
-	'border',
-	'position',
-	'shadow',
-	'background',
-	'advanced',
-] );
+/**
+ * Panel headers we hide on Simple. Stored as the canonical English label —
+ * `getHiddenPanelLabels()` adds the active-locale translation at runtime via
+ * the core (`default`) textdomain so non-English locales also match.
+ *
+ * Label drift in core (e.g. "Dimensions" → "Spacing") still breaks us
+ * silently: ToolsPanel does not expose a stable `data-*` identifier today.
+ * TODO: when Gutenberg ships a stable panel-id attribute, prefer that over
+ * label matching. Tracked here: https://github.com/WordPress/gutenberg
+ */
+const HIDDEN_PANEL_LABELS_EN = [
+	'Layout',
+	'Dimensions',
+	'Border',
+	'Position',
+	'Shadow',
+	'Background',
+	'Advanced',
+];
+
+function getHiddenPanelLabels() {
+	const set = new Set();
+	HIDDEN_PANEL_LABELS_EN.forEach( ( en ) => {
+		set.add( en.toLowerCase() );
+		// `__()` with the default (core) textdomain picks up Gutenberg's
+		// shipped translations when they're present on the page. Falls back
+		// to the source string when no translation is registered.
+		const translated = __( en ).trim().toLowerCase();
+		if ( translated ) {
+			set.add( translated );
+		}
+	} );
+	return set;
+}
+
+let hiddenPanelLabels = getHiddenPanelLabels();
 
 function isPatternBlockInspector() {
 	// When a pattern wrapper is selected, skip Styles auto-activation so the
@@ -146,7 +174,7 @@ function hidePanelsByLabel( root ) {
 		}
 		// Match by exact label or first-word (e.g. "Layout" vs "Layout · Group").
 		const firstWord = label.split( /\s+/ )[ 0 ];
-		if ( HIDDEN_PANEL_LABELS.has( label ) || HIDDEN_PANEL_LABELS.has( firstWord ) ) {
+		if ( hiddenPanelLabels.has( label ) || hiddenPanelLabels.has( firstWord ) ) {
 			panel.style.display = 'none';
 			panel.setAttribute( PANEL_HIDDEN, 'true' );
 		}
