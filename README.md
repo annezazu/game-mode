@@ -67,6 +67,29 @@ npm test
 
 Jest unit tests cover the pure block-support helpers (`minimizeSupports`, `expandDefaultControls`).
 
+### Reproducing first-run for testing
+
+The "Choose your difficulty" picker fires once, when **all** of the following are true: no `game_mode_level` user meta, no `core/preferences['game-mode']['level']`, and the Site Editor's welcome guide has been dismissed. To force a fresh first-run experience without uninstalling/reinstalling, run this in the browser console while on `site-editor.php`:
+
+```js
+// 1. Clear the per-user meta (level lives on /wp/v2/users/me).
+await wp.apiFetch( {
+	path: '/wp/v2/users/me',
+	method: 'POST',
+	data: { meta: { game_mode_level: '' } },
+} );
+
+// 2. Clear the in-store preference.
+wp.data.dispatch( 'core/preferences' ).set( 'game-mode', 'level', undefined );
+
+// 3. Dismiss the Site Editor welcome guide so it doesn't block our picker.
+wp.data.dispatch( 'core/preferences' ).set( 'core/edit-site', 'welcomeGuide', false );
+
+location.reload();
+```
+
+After reload, the picker should appear. If it doesn't, check `wp.data.select('core').getCurrentUser().meta.game_mode_level` — it should be empty.
+
 ## Architecture
 
 - **PHP** (`game-mode.php`): bootstrap, asset enqueue gated to `site-editor.php`, registered user meta (`game_mode_level`) exposed through `/wp/v2/users/me`, and three server-side curation layers — `allowed_block_types_all` for theme-block hiding on Simple, `block_editor_settings_all` for per-level editor settings (`codeEditingEnabled`, `disableContentOnlyForUnsyncedPatterns`), and `wp_theme_json_data_user` for Simple's declarative settings constraints (appearance-tools off, advanced typography keys off, etc.). The theme.json layer is belt-and-braces on top of `minimizeSupports` — settings can't gate the ToolsPanel "more" menu, only the default-visible set.
