@@ -350,6 +350,7 @@ function GameModeUI() {
 						savedGeometry ?? [ 'bottom-right', 20, 20, 180, 56 ]
 					}
 					margin={ 20 }
+					minSize={ [ 100, 0 ] }
 					resizable={ false }
 					onMoveEnd={ setSwitcherGeometry }
 				>
