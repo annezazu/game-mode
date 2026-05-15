@@ -176,17 +176,15 @@ function GameModeUI() {
 		}
 	}, [ level ] );
 
-	// Avoid layering the first-run picker on top of WP's welcome guide. Wait
-	// until the welcome guide preference flips off (user dismissed it) before
-	// auto-opening.
+	// Avoid layering the first-run picker on top of WP's Site Editor welcome
+	// guide. Wait until the user dismisses that one before auto-opening.
+	// Only the Site Editor's `welcomeGuide` flag is checked here — the other
+	// flags (`welcomeGuideStyles`, `core/edit-post.welcomeGuide`,
+	// `core/editor.welcomeGuide`) are independent and would silently suppress
+	// our picker even when no competing modal is actually visible. See
+	// README "Reproducing first-run for testing".
 	const welcomeGuideOpen = useSelect( ( s ) => {
-		const prefs = s( preferencesStore );
-		return (
-			!! prefs.get( 'core/edit-site', 'welcomeGuide' ) ||
-			!! prefs.get( 'core/edit-site', 'welcomeGuideStyles' ) ||
-			!! prefs.get( 'core/edit-post', 'welcomeGuide' ) ||
-			!! prefs.get( 'core/editor', 'welcomeGuide' )
-		);
+		return !! s( preferencesStore ).get( 'core/edit-site', 'welcomeGuide' );
 	}, [] );
 
 	useEffect( () => {
