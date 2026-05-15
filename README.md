@@ -24,6 +24,14 @@ A persistent switcher in the bottom-right of the editor lets you change levels a
 | Pattern editing UX | locked unless "Edit pattern" clicked | auto-unlocked | auto-unlocked |
 | Lock-removal on root blocks | locked (Backspace can't wipe a section) | unlocked | unlocked |
 
+## Try it in WordPress Playground
+
+No install needed — open the latest build in a throwaway WordPress site in your browser:
+
+**[▶ Launch Game Mode in Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/annezazu/game-mode/main/blueprint.json)**
+
+You'll be auto-logged-in as admin and dropped straight into the Site Editor with the plugin active. Each push to `main` triggers a rebuild, so the link always reflects the latest code.
+
 ## Install
 
 This repo ships source only. To use the plugin you need to build it once, then drop the directory into `wp-content/plugins/`.

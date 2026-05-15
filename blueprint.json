@@ -20,7 +20,10 @@
 			"step": "installPlugin",
 			"pluginData": {
 				"resource": "url",
-				"url": "https://github-proxy.com/proxy/?repo=annezazu/game-mode"
+				"url": "https://github.com/annezazu/game-mode/releases/download/playground/game-mode.zip"
+			},
+			"options": {
+				"activate": true
 			}
 		}
 	]

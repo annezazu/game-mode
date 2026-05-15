@@ -1,0 +1,71 @@
+name: Publish Playground build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: playground-release
+  cancel-in-progress: true
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Stage plugin folder
+        run: |
+          STAGE="$RUNNER_TEMP/game-mode"
+          mkdir -p "$STAGE"
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='artifacts' \
+            --exclude='playwright.config.js' \
+            --exclude='playwright-report' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
+            --exclude='src' \
+            --exclude='.gitignore' \
+            --exclude='CONTRIBUTING.md' \
+            ./ "$STAGE/"
+          cd "$RUNNER_TEMP"
+          zip -r game-mode.zip game-mode
+          ls -la game-mode.zip
+
+      - name: Publish rolling Playground release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=playground
+          ZIP="$RUNNER_TEMP/game-mode.zip"
+          # Recreate the rolling tag at HEAD so the release always reflects latest main.
+          git tag -f "$TAG"
+          git push origin -f "refs/tags/$TAG"
+          # Upsert the release: delete the old asset (if any), then upload fresh.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ZIP" --clobber
+          else
+            gh release create "$TAG" "$ZIP" \
+              --title "Latest build for WordPress Playground" \
+              --notes "Auto-built from main. Used by blueprint.json for Playground testing. Not a stable release." \
+              --prerelease
+          fi
