@@ -11,6 +11,9 @@
  * match.
  */
 
+import { select } from '@wordpress/data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
+
 import { getObserverTarget } from './observer-target';
 
 let observer = null;
@@ -59,14 +62,16 @@ const HIDDEN_PANEL_LABELS = new Set( [
 	'advanced',
 ] );
 
-function isPatternBlockInspector( root ) {
-	// When a pattern wrapper is selected the inspector renders an
-	// "Edit pattern" button. Skip the Styles auto-activation in that case
-	// so the user lands on Settings (Content list + Edit pattern), and
-	// styling the pattern wrapper isn't possible without explicit opt-in.
-	return Array.from( root.querySelectorAll( 'button' ) ).some(
-		( btn ) => ( btn.textContent || '' ).trim().toLowerCase() === 'edit pattern'
-	);
+function isPatternBlockInspector() {
+	// When a pattern wrapper is selected, skip Styles auto-activation so the
+	// user lands on Settings (Content list + Edit pattern) and styling the
+	// pattern wrapper isn't possible without explicit opt-in.
+	//
+	// Detect via block name (`core/block` — the canonical synced-pattern
+	// block) rather than DOM-matching the visible "Edit pattern" button
+	// text, which breaks on Gutenberg label rewordings and in non-English
+	// locales.
+	return select( blockEditorStore ).getSelectedBlock()?.name === 'core/block';
 }
 
 function activateStylesTab( root ) {
@@ -76,7 +81,7 @@ function activateStylesTab( root ) {
 	if ( ! tabs.length ) {
 		return;
 	}
-	if ( isPatternBlockInspector( root ) ) {
+	if ( isPatternBlockInspector() ) {
 		const tablist = tabs[ 0 ].closest( '[role="tablist"]' );
 		if ( tablist ) {
 			hideAccessibly( tablist );
