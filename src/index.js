@@ -351,6 +351,7 @@ function GameModeUI() {
 					}
 					margin={ 20 }
 					minSize={ [ 100, 0 ] }
+					snapMargin={ 20 }
 					resizable={ false }
 					onMoveEnd={ setSwitcherGeometry }
 				>
